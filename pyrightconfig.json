@@ -1,0 +1,9 @@
+{
+  "venvPath": "sdk/python",
+  "venv": ".venv",
+  "pythonVersion": "3.11",
+  "include": [
+    "sdk/python/src",
+    "sdk/python/tests"
+  ]
+}
