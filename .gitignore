@@ -1,0 +1,64 @@
+# ── Go ────────────────────────────────────────
+# Binários compilados
+runtime/bin/
+*.exe
+*.test
+
+# Cache de build e test
+runtime/.cache/
+
+# Vendor (dependências copiadas localmente — não usamos por ora)
+runtime/vendor/
+
+# Cobertura de testes
+*.out
+coverage.html
+
+# ── Python ────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Ambientes virtuais
+.venv/
+venv/
+env/
+
+# Distribuição / empacotamento
+dist/
+build/
+*.egg-info/
+*.egg
+
+# ── Código gerado pelo protoc ─────────────────
+# Optamos por NÃO ignorar runtime/gen/ e sdk/python/src/
+# para que o repo seja utilizável sem precisar rodar "make proto".
+# Se preferir regenerar sempre, descomente as linhas abaixo:
+# runtime/gen/
+# sdk/python/src/contract/
+
+# ── Resultados de benchmarks ──────────────────
+# Mantém a estrutura de pastas mas ignora arquivos de dados
+experiments/results/*.jsonl
+experiments/results/*.csv
+experiments/results/*.png
+!experiments/results/.gitkeep
+
+# ── Variáveis de ambiente ─────────────────────
+.env
+.env.*
+!.env.example
+
+# ── Sistema operacional ───────────────────────
+.DS_Store
+Thumbs.db
+
+# ── Editores / IDEs ───────────────────────────
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Docs 
+CLAUDE.md
+docs
