@@ -26,7 +26,7 @@ def _now():
     return ts
 
 
-def _build_descriptor(agent_id, capability, port):
+def _build_descriptor(agent_id, capability, host, port):
     return contract_pb2.AgentDescriptor(
         agent_id=agent_id,
         name=f"Mock Agent ({agent_id})",
@@ -41,7 +41,7 @@ def _build_descriptor(agent_id, capability, port):
         ],
         endpoint=contract_pb2.AgentEndpoint(
             protocol="grpc",
-            address=f"localhost:{port}",
+            address=f"{host}:{port}",
         ),
         status=contract_pb2.AGENT_STATUS_ALIVE,
     )
@@ -101,13 +101,14 @@ def register(registry_addr, descriptor):
 
 def main():
     agent_id = os.getenv("AGENT_ID", "mock-agent-01")
+    host = os.getenv("AGENT_HOST", "localhost")
     port = int(os.getenv("AGENT_PORT", "60051"))
     registry_addr = os.getenv("REGISTRY_ADDR", "localhost:50051")
     capability = os.getenv("CAPABILITY", "echo")
     delay_ms = int(os.getenv("DELAY_MS", "100"))
     fail_rate = float(os.getenv("FAIL_RATE", "0.0"))
 
-    descriptor = _build_descriptor(agent_id, capability, port)
+    descriptor = _build_descriptor(agent_id, capability, host, port)
     register(registry_addr, descriptor)
 
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=4))

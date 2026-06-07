@@ -1,0 +1,45 @@
+services:
+
+  registry:
+    build:
+      context: ..
+      dockerfile: runtime/services/registry/Dockerfile
+    ports:
+      - "50051:50051"
+    environment:
+      REGISTRY_ADDR: ":50051"
+
+  orchestrator:
+    build:
+      context: ..
+      dockerfile: runtime/services/orchestrator/Dockerfile
+    ports:
+      - "50052:50052"
+    environment:
+      ORCHESTRATOR_ADDR: ":50052"
+      REGISTRY_ADDR: "registry:50051"
+      EVENTS_PATH: "/data/events.jsonl"
+    volumes:
+      - events_data:/data
+    depends_on:
+      - registry
+
+  mock-agent:
+    build:
+      context: ..
+      dockerfile: agents/mock-agent/Dockerfile
+    ports:
+      - "60051:60051"
+    environment:
+      AGENT_ID: "mock-agent-01"
+      AGENT_HOST: "mock-agent"
+      AGENT_PORT: "60051"
+      REGISTRY_ADDR: "registry:50051"
+      CAPABILITY: "echo"
+      DELAY_MS: "100"
+      FAIL_RATE: "0.0"
+    depends_on:
+      - registry
+
+volumes:
+  events_data:

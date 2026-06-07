@@ -1,0 +1,10 @@
+.git
+.venv
+**/.venv
+**/node_modules
+runtime/bin
+runtime/.cache
+experiments/results/*.jsonl
+experiments/results/*.csv
+docs
+*.md
