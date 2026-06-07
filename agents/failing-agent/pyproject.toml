@@ -1,0 +1,8 @@
+[project]
+name = "failing-agent"
+version = "0.1.0"
+description = "Agente exemplo que sempre falha — testa a reação do orchestrator (tg_sdk)"
+requires-python = ">=3.11"
+dependencies = [
+    "grpcio",
+]
