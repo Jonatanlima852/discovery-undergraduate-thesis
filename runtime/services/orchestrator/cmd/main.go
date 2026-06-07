@@ -1,0 +1,50 @@
+package main
+
+import (
+	"log/slog"
+	"net"
+	"os"
+
+	"google.golang.org/grpc"
+
+	pb "tg/runtime/gen/go/contract/v1"
+	"tg/runtime/services/orchestrator/internal/events"
+	"tg/runtime/services/orchestrator/internal/server"
+)
+
+func main() {
+	addr := os.Getenv("ORCHESTRATOR_ADDR")
+	if addr == "" {
+		addr = ":50052"
+	}
+	registryAddr := os.Getenv("REGISTRY_ADDR")
+	if registryAddr == "" {
+		registryAddr = "localhost:50051"
+	}
+	eventsPath := os.Getenv("EVENTS_PATH")
+	if eventsPath == "" {
+		eventsPath = "experiments/results/events.jsonl"
+	}
+
+	logger, err := events.NewLogger(eventsPath)
+	if err != nil {
+		slog.Error("failed to open events file", "path", eventsPath, "err", err)
+		os.Exit(1)
+	}
+	defer logger.Close()
+
+	lis, err := net.Listen("tcp", addr)
+	if err != nil {
+		slog.Error("failed to listen", "addr", addr, "err", err)
+		os.Exit(1)
+	}
+
+	grpcServer := grpc.NewServer()
+	pb.RegisterOrchestratorServiceServer(grpcServer, server.New(registryAddr, logger))
+
+	slog.Info("orchestrator service started", "addr", addr, "registry", registryAddr)
+	if err := grpcServer.Serve(lis); err != nil {
+		slog.Error("server stopped", "err", err)
+		os.Exit(1)
+	}
+}
