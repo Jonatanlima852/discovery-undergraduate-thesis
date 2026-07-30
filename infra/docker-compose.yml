@@ -8,6 +8,9 @@ services:
       - "50051:50051"
     environment:
       REGISTRY_ADDR: ":50051"
+      FAILURE_SCAN_INTERVAL: "1s"
+      SUSPECTED_TIMEOUT: "10s"
+      DEAD_TIMEOUT: "20s"
 
   orchestrator:
     build:
@@ -38,6 +41,7 @@ services:
       CAPABILITY: "echo"
       DELAY_MS: "100"
       FAIL_RATE: "0.0"
+      HEARTBEAT_INTERVAL_SECONDS: "5"
     depends_on:
       - registry
 

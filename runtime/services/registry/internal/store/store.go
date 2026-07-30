@@ -5,19 +5,37 @@ import (
 	"sync"
 	"time"
 
-	pb "tg/runtime/gen/go/contract/v1"
 	"google.golang.org/protobuf/types/known/timestamppb"
+	pb "tg/runtime/gen/go/contract/v1"
 )
 
 // AgentStore mantém os agentes registrados em memória.
 type AgentStore struct {
-	mu     sync.RWMutex
-	agents map[string]*pb.AgentDescriptor
+	mu            sync.RWMutex
+	agents        map[string]*pb.AgentDescriptor
+	healthByAgent map[string]HealthRecord
+}
+
+// HealthRecord guarda o estado de saúde recebido pelo Registry.
+// LastHeartbeatAt usa o relógio do Registry, não o timestamp do agente.
+type HealthRecord struct {
+	LastHeartbeatAt  time.Time
+	CurrentTaskCount int32
+	Load             float64
+	Details          string
+}
+
+// HealthTransition descreve uma mudança de estado produzida pelo detector.
+type HealthTransition struct {
+	AgentID string
+	From    pb.AgentStatus
+	To      pb.AgentStatus
 }
 
 func New() *AgentStore {
 	return &AgentStore{
-		agents: make(map[string]*pb.AgentDescriptor),
+		agents:        make(map[string]*pb.AgentDescriptor),
+		healthByAgent: make(map[string]HealthRecord),
 	}
 }
 
@@ -31,6 +49,7 @@ func (st *AgentStore) Save(agent *pb.AgentDescriptor) {
 	}
 	agent.UpdatedAt = now
 	st.agents[agent.AgentId] = agent
+	st.healthByAgent[agent.AgentId] = HealthRecord{LastHeartbeatAt: time.Now()}
 }
 
 func (st *AgentStore) Delete(agentID string) error {
@@ -41,6 +60,7 @@ func (st *AgentStore) Delete(agentID string) error {
 		return fmt.Errorf("agent %q not found", agentID)
 	}
 	delete(st.agents, agentID)
+	delete(st.healthByAgent, agentID)
 	return nil
 }
 
@@ -77,17 +97,72 @@ func (st *AgentStore) List(requiredCapabilities []string, statusFilter pb.AgentS
 	return result
 }
 
-func (st *AgentStore) UpdateHealth(agentID string, newStatus pb.AgentStatus) error {
+func (st *AgentStore) UpdateHealth(health *pb.HealthStatus) error {
 	st.mu.Lock()
 	defer st.mu.Unlock()
 
-	agent, exists := st.agents[agentID]
+	agent, exists := st.agents[health.AgentId]
 	if !exists {
-		return fmt.Errorf("agent %q not found", agentID)
+		return fmt.Errorf("agent %q not found", health.AgentId)
 	}
-	agent.Status = newStatus
-	agent.UpdatedAt = timestamppb.New(time.Now())
+	now := time.Now()
+	agent.Status = health.Status
+	agent.UpdatedAt = timestamppb.New(now)
+	st.healthByAgent[health.AgentId] = HealthRecord{
+		LastHeartbeatAt:  now,
+		CurrentTaskCount: health.CurrentTaskCount,
+		Load:             health.Load,
+		Details:          health.Details,
+	}
 	return nil
+}
+
+func (st *AgentStore) GetHealth(agentID string) (HealthRecord, error) {
+	st.mu.RLock()
+	defer st.mu.RUnlock()
+
+	health, exists := st.healthByAgent[agentID]
+	if !exists {
+		return HealthRecord{}, fmt.Errorf("agent %q not found", agentID)
+	}
+	return health, nil
+}
+
+// DetectFailures aplica os timeouts usando o instante recebido do chamador.
+// O parâmetro explícito facilita testes determinísticos sem sleeps.
+func (st *AgentStore) DetectFailures(now time.Time, suspectedTimeout, deadTimeout time.Duration) []HealthTransition {
+	st.mu.Lock()
+	defer st.mu.Unlock()
+
+	var transitions []HealthTransition
+	for agentID, agent := range st.agents {
+		health, exists := st.healthByAgent[agentID]
+		if !exists {
+			continue
+		}
+
+		elapsed := now.Sub(health.LastHeartbeatAt)
+		target := agent.Status
+		switch {
+		case elapsed > deadTimeout:
+			target = pb.AgentStatus_AGENT_STATUS_DEAD
+		case elapsed > suspectedTimeout && agent.Status != pb.AgentStatus_AGENT_STATUS_DEAD:
+			target = pb.AgentStatus_AGENT_STATUS_SUSPECTED
+		}
+
+		if target == agent.Status {
+			continue
+		}
+		previous := agent.Status
+		agent.Status = target
+		agent.UpdatedAt = timestamppb.New(now)
+		transitions = append(transitions, HealthTransition{
+			AgentID: agentID,
+			From:    previous,
+			To:      target,
+		})
+	}
+	return transitions
 }
 
 // hasAllCapabilities verifica se o agente possui todas as capabilities pedidas.

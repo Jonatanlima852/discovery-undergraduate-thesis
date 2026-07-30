@@ -4,10 +4,10 @@ import (
 	"context"
 	"log/slog"
 
-	pb "tg/runtime/gen/go/contract/v1"
-	"tg/runtime/services/registry/internal/store"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	pb "tg/runtime/gen/go/contract/v1"
+	"tg/runtime/services/registry/internal/store"
 )
 
 // RegistryServer implementa pb.RegistryServiceServer.
@@ -55,7 +55,10 @@ func (srv *RegistryServer) ReportHealth(_ context.Context, req *pb.ReportHealthR
 	if req.Health == nil {
 		return nil, status.Error(codes.InvalidArgument, "health is required")
 	}
-	if err := srv.agentStore.UpdateHealth(req.Health.AgentId, req.Health.Status); err != nil {
+	if req.Health.AgentId == "" {
+		return nil, status.Error(codes.InvalidArgument, "health.agent_id is required")
+	}
+	if err := srv.agentStore.UpdateHealth(req.Health); err != nil {
 		return nil, status.Error(codes.NotFound, err.Error())
 	}
 	slog.Info("health reported", "agent_id", req.Health.AgentId, "status", req.Health.Status)
