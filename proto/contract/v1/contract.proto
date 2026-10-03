@@ -335,8 +335,85 @@ message SubmitTaskResponse {
   ErrorInfo  error  = 2;
 }
 
+// ─────────────────────────────────────────────
+// Workflow experimental (Fase 12E)
+// O planner descreve trabalho; o runtime valida e controla a execução.
+// ─────────────────────────────────────────────
+
+enum WorkflowStatus {
+  WORKFLOW_STATUS_UNKNOWN    = 0;
+  WORKFLOW_STATUS_CREATED    = 1;
+  WORKFLOW_STATUS_PLANNING   = 2;
+  WORKFLOW_STATUS_VALIDATING = 3;
+  WORKFLOW_STATUS_RUNNING    = 4;
+  WORKFLOW_STATUS_COMPLETED  = 5;
+  WORKFLOW_STATUS_FAILED     = 6;
+  WORKFLOW_STATUS_CANCELLED  = 7;
+  WORKFLOW_STATUS_TIMEOUT    = 8;
+}
+
+enum WorkflowStepStatus {
+  WORKFLOW_STEP_STATUS_UNKNOWN   = 0;
+  WORKFLOW_STEP_STATUS_PENDING   = 1;
+  WORKFLOW_STEP_STATUS_READY     = 2;
+  WORKFLOW_STEP_STATUS_RUNNING   = 3;
+  WORKFLOW_STEP_STATUS_COMPLETED = 4;
+  WORKFLOW_STEP_STATUS_FAILED    = 5;
+  WORKFLOW_STEP_STATUS_SKIPPED   = 6;
+  WORKFLOW_STEP_STATUS_CANCELLED = 7;
+}
+
+message ResultBinding {
+  string source_step_id = 1;
+  string source_path    = 2;
+  string target_field   = 3;
+}
+
+message WorkflowStep {
+  string step_id                  = 1;
+  Task task_template              = 2;
+  repeated string depends_on      = 3;
+  repeated ResultBinding input_bindings = 4;
+}
+
+message WorkflowDefinition {
+  string workflow_id           = 1;
+  repeated WorkflowStep steps  = 2;
+  string final_step_id         = 3;
+}
+
+message SubmitWorkflowRequest {
+  Task root_task                 = 1;
+  WorkflowDefinition workflow   = 2;
+}
+
+message WorkflowStepResult {
+  string step_id             = 1;
+  WorkflowStepStatus status  = 2;
+  TaskResult result          = 3;
+}
+
+message WorkflowResult {
+  string workflow_id                  = 1;
+  string run_id                       = 2;
+  string root_task_id                 = 3;
+  WorkflowStatus status               = 4;
+  repeated WorkflowStepResult step_results = 5;
+  google.protobuf.Struct output       = 6;
+  ErrorInfo error                     = 7;
+  TraceContext trace                  = 8;
+  google.protobuf.Timestamp created_at   = 9;
+  google.protobuf.Timestamp completed_at = 10;
+}
+
+message SubmitWorkflowResponse {
+  WorkflowResult result = 1;
+  ErrorInfo error        = 2;
+}
+
 service OrchestratorService {
   rpc SubmitTask (SubmitTaskRequest) returns (SubmitTaskResponse);
+  rpc SubmitWorkflow (SubmitWorkflowRequest) returns (SubmitWorkflowResponse);
 }
 
 // ─────────────────────────────────────────────

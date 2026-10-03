@@ -273,7 +273,8 @@ var RegistryService_ServiceDesc = grpc.ServiceDesc{
 }
 
 const (
-	OrchestratorService_SubmitTask_FullMethodName = "/contract.v1.OrchestratorService/SubmitTask"
+	OrchestratorService_SubmitTask_FullMethodName     = "/contract.v1.OrchestratorService/SubmitTask"
+	OrchestratorService_SubmitWorkflow_FullMethodName = "/contract.v1.OrchestratorService/SubmitWorkflow"
 )
 
 // OrchestratorServiceClient is the client API for OrchestratorService service.
@@ -281,6 +282,7 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type OrchestratorServiceClient interface {
 	SubmitTask(ctx context.Context, in *SubmitTaskRequest, opts ...grpc.CallOption) (*SubmitTaskResponse, error)
+	SubmitWorkflow(ctx context.Context, in *SubmitWorkflowRequest, opts ...grpc.CallOption) (*SubmitWorkflowResponse, error)
 }
 
 type orchestratorServiceClient struct {
@@ -301,11 +303,22 @@ func (c *orchestratorServiceClient) SubmitTask(ctx context.Context, in *SubmitTa
 	return out, nil
 }
 
+func (c *orchestratorServiceClient) SubmitWorkflow(ctx context.Context, in *SubmitWorkflowRequest, opts ...grpc.CallOption) (*SubmitWorkflowResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(SubmitWorkflowResponse)
+	err := c.cc.Invoke(ctx, OrchestratorService_SubmitWorkflow_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // OrchestratorServiceServer is the server API for OrchestratorService service.
 // All implementations must embed UnimplementedOrchestratorServiceServer
 // for forward compatibility.
 type OrchestratorServiceServer interface {
 	SubmitTask(context.Context, *SubmitTaskRequest) (*SubmitTaskResponse, error)
+	SubmitWorkflow(context.Context, *SubmitWorkflowRequest) (*SubmitWorkflowResponse, error)
 	mustEmbedUnimplementedOrchestratorServiceServer()
 }
 
@@ -318,6 +331,9 @@ type UnimplementedOrchestratorServiceServer struct{}
 
 func (UnimplementedOrchestratorServiceServer) SubmitTask(context.Context, *SubmitTaskRequest) (*SubmitTaskResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method SubmitTask not implemented")
+}
+func (UnimplementedOrchestratorServiceServer) SubmitWorkflow(context.Context, *SubmitWorkflowRequest) (*SubmitWorkflowResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method SubmitWorkflow not implemented")
 }
 func (UnimplementedOrchestratorServiceServer) mustEmbedUnimplementedOrchestratorServiceServer() {}
 func (UnimplementedOrchestratorServiceServer) testEmbeddedByValue()                             {}
@@ -358,6 +374,24 @@ func _OrchestratorService_SubmitTask_Handler(srv interface{}, ctx context.Contex
 	return interceptor(ctx, in, info, handler)
 }
 
+func _OrchestratorService_SubmitWorkflow_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SubmitWorkflowRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OrchestratorServiceServer).SubmitWorkflow(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: OrchestratorService_SubmitWorkflow_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OrchestratorServiceServer).SubmitWorkflow(ctx, req.(*SubmitWorkflowRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // OrchestratorService_ServiceDesc is the grpc.ServiceDesc for OrchestratorService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -368,6 +402,10 @@ var OrchestratorService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "SubmitTask",
 			Handler:    _OrchestratorService_SubmitTask_Handler,
+		},
+		{
+			MethodName: "SubmitWorkflow",
+			Handler:    _OrchestratorService_SubmitWorkflow_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

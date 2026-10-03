@@ -283,12 +283,23 @@ class OrchestratorServiceStub(object):
                 request_serializer=contract_dot_v1_dot_contract__pb2.SubmitTaskRequest.SerializeToString,
                 response_deserializer=contract_dot_v1_dot_contract__pb2.SubmitTaskResponse.FromString,
                 _registered_method=True)
+        self.SubmitWorkflow = channel.unary_unary(
+                '/contract.v1.OrchestratorService/SubmitWorkflow',
+                request_serializer=contract_dot_v1_dot_contract__pb2.SubmitWorkflowRequest.SerializeToString,
+                response_deserializer=contract_dot_v1_dot_contract__pb2.SubmitWorkflowResponse.FromString,
+                _registered_method=True)
 
 
 class OrchestratorServiceServicer(object):
     """Missing associated documentation comment in .proto file."""
 
     def SubmitTask(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def SubmitWorkflow(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -301,6 +312,11 @@ def add_OrchestratorServiceServicer_to_server(servicer, server):
                     servicer.SubmitTask,
                     request_deserializer=contract_dot_v1_dot_contract__pb2.SubmitTaskRequest.FromString,
                     response_serializer=contract_dot_v1_dot_contract__pb2.SubmitTaskResponse.SerializeToString,
+            ),
+            'SubmitWorkflow': grpc.unary_unary_rpc_method_handler(
+                    servicer.SubmitWorkflow,
+                    request_deserializer=contract_dot_v1_dot_contract__pb2.SubmitWorkflowRequest.FromString,
+                    response_serializer=contract_dot_v1_dot_contract__pb2.SubmitWorkflowResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -330,6 +346,33 @@ class OrchestratorService(object):
             '/contract.v1.OrchestratorService/SubmitTask',
             contract_dot_v1_dot_contract__pb2.SubmitTaskRequest.SerializeToString,
             contract_dot_v1_dot_contract__pb2.SubmitTaskResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def SubmitWorkflow(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/contract.v1.OrchestratorService/SubmitWorkflow',
+            contract_dot_v1_dot_contract__pb2.SubmitWorkflowRequest.SerializeToString,
+            contract_dot_v1_dot_contract__pb2.SubmitWorkflowResponse.FromString,
             options,
             channel_credentials,
             insecure,
