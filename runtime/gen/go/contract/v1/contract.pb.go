@@ -2301,11 +2301,12 @@ func (x *SubmitTaskRequest) GetTask() *Task {
 }
 
 type SubmitTaskResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Result        *TaskResult            `protobuf:"bytes,1,opt,name=result,proto3" json:"result,omitempty"`
-	Error         *ErrorInfo             `protobuf:"bytes,2,opt,name=error,proto3" json:"error,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	Result         *TaskResult            `protobuf:"bytes,1,opt,name=result,proto3" json:"result,omitempty"`
+	Error          *ErrorInfo             `protobuf:"bytes,2,opt,name=error,proto3" json:"error,omitempty"`
+	WorkflowResult *WorkflowResult        `protobuf:"bytes,3,opt,name=workflow_result,json=workflowResult,proto3" json:"workflow_result,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
 }
 
 func (x *SubmitTaskResponse) Reset() {
@@ -2348,6 +2349,13 @@ func (x *SubmitTaskResponse) GetResult() *TaskResult {
 func (x *SubmitTaskResponse) GetError() *ErrorInfo {
 	if x != nil {
 		return x.Error
+	}
+	return nil
+}
+
+func (x *SubmitTaskResponse) GetWorkflowResult() *WorkflowResult {
+	if x != nil {
+		return x.WorkflowResult
 	}
 	return nil
 }
@@ -3063,10 +3071,11 @@ const file_contract_v1_contract_proto_rawDesc = "" +
 	"\x14ReportHealthResponse\x12\x18\n" +
 	"\asuccess\x18\x01 \x01(\bR\asuccess\":\n" +
 	"\x11SubmitTaskRequest\x12%\n" +
-	"\x04task\x18\x01 \x01(\v2\x11.contract.v1.TaskR\x04task\"s\n" +
+	"\x04task\x18\x01 \x01(\v2\x11.contract.v1.TaskR\x04task\"\xb9\x01\n" +
 	"\x12SubmitTaskResponse\x12/\n" +
 	"\x06result\x18\x01 \x01(\v2\x17.contract.v1.TaskResultR\x06result\x12,\n" +
-	"\x05error\x18\x02 \x01(\v2\x16.contract.v1.ErrorInfoR\x05error\"y\n" +
+	"\x05error\x18\x02 \x01(\v2\x16.contract.v1.ErrorInfoR\x05error\x12D\n" +
+	"\x0fworkflow_result\x18\x03 \x01(\v2\x1b.contract.v1.WorkflowResultR\x0eworkflowResult\"y\n" +
 	"\rResultBinding\x12$\n" +
 	"\x0esource_step_id\x18\x01 \x01(\tR\fsourceStepId\x12\x1f\n" +
 	"\vsource_path\x18\x02 \x01(\tR\n" +
@@ -3307,45 +3316,46 @@ var file_contract_v1_contract_proto_depIdxs = []int32{
 	17, // 40: contract.v1.SubmitTaskRequest.task:type_name -> contract.v1.Task
 	18, // 41: contract.v1.SubmitTaskResponse.result:type_name -> contract.v1.TaskResult
 	9,  // 42: contract.v1.SubmitTaskResponse.error:type_name -> contract.v1.ErrorInfo
-	17, // 43: contract.v1.WorkflowStep.task_template:type_name -> contract.v1.Task
-	33, // 44: contract.v1.WorkflowStep.input_bindings:type_name -> contract.v1.ResultBinding
-	34, // 45: contract.v1.WorkflowDefinition.steps:type_name -> contract.v1.WorkflowStep
-	17, // 46: contract.v1.SubmitWorkflowRequest.root_task:type_name -> contract.v1.Task
-	35, // 47: contract.v1.SubmitWorkflowRequest.workflow:type_name -> contract.v1.WorkflowDefinition
-	7,  // 48: contract.v1.WorkflowStepResult.status:type_name -> contract.v1.WorkflowStepStatus
-	18, // 49: contract.v1.WorkflowStepResult.result:type_name -> contract.v1.TaskResult
-	6,  // 50: contract.v1.WorkflowResult.status:type_name -> contract.v1.WorkflowStatus
-	37, // 51: contract.v1.WorkflowResult.step_results:type_name -> contract.v1.WorkflowStepResult
-	42, // 52: contract.v1.WorkflowResult.output:type_name -> google.protobuf.Struct
-	9,  // 53: contract.v1.WorkflowResult.error:type_name -> contract.v1.ErrorInfo
-	8,  // 54: contract.v1.WorkflowResult.trace:type_name -> contract.v1.TraceContext
-	43, // 55: contract.v1.WorkflowResult.created_at:type_name -> google.protobuf.Timestamp
-	43, // 56: contract.v1.WorkflowResult.completed_at:type_name -> google.protobuf.Timestamp
-	38, // 57: contract.v1.SubmitWorkflowResponse.result:type_name -> contract.v1.WorkflowResult
-	9,  // 58: contract.v1.SubmitWorkflowResponse.error:type_name -> contract.v1.ErrorInfo
-	17, // 59: contract.v1.ExecuteTaskRequest.task:type_name -> contract.v1.Task
-	18, // 60: contract.v1.ExecuteTaskResponse.result:type_name -> contract.v1.TaskResult
-	21, // 61: contract.v1.RegistryService.RegisterAgent:input_type -> contract.v1.RegisterAgentRequest
-	23, // 62: contract.v1.RegistryService.UnregisterAgent:input_type -> contract.v1.UnregisterAgentRequest
-	25, // 63: contract.v1.RegistryService.GetAgent:input_type -> contract.v1.GetAgentRequest
-	27, // 64: contract.v1.RegistryService.DiscoverAgents:input_type -> contract.v1.DiscoverAgentsRequest
-	29, // 65: contract.v1.RegistryService.ReportHealth:input_type -> contract.v1.ReportHealthRequest
-	31, // 66: contract.v1.OrchestratorService.SubmitTask:input_type -> contract.v1.SubmitTaskRequest
-	36, // 67: contract.v1.OrchestratorService.SubmitWorkflow:input_type -> contract.v1.SubmitWorkflowRequest
-	40, // 68: contract.v1.AgentService.ExecuteTask:input_type -> contract.v1.ExecuteTaskRequest
-	22, // 69: contract.v1.RegistryService.RegisterAgent:output_type -> contract.v1.RegisterAgentResponse
-	24, // 70: contract.v1.RegistryService.UnregisterAgent:output_type -> contract.v1.UnregisterAgentResponse
-	26, // 71: contract.v1.RegistryService.GetAgent:output_type -> contract.v1.GetAgentResponse
-	28, // 72: contract.v1.RegistryService.DiscoverAgents:output_type -> contract.v1.DiscoverAgentsResponse
-	30, // 73: contract.v1.RegistryService.ReportHealth:output_type -> contract.v1.ReportHealthResponse
-	32, // 74: contract.v1.OrchestratorService.SubmitTask:output_type -> contract.v1.SubmitTaskResponse
-	39, // 75: contract.v1.OrchestratorService.SubmitWorkflow:output_type -> contract.v1.SubmitWorkflowResponse
-	41, // 76: contract.v1.AgentService.ExecuteTask:output_type -> contract.v1.ExecuteTaskResponse
-	69, // [69:77] is the sub-list for method output_type
-	61, // [61:69] is the sub-list for method input_type
-	61, // [61:61] is the sub-list for extension type_name
-	61, // [61:61] is the sub-list for extension extendee
-	0,  // [0:61] is the sub-list for field type_name
+	38, // 43: contract.v1.SubmitTaskResponse.workflow_result:type_name -> contract.v1.WorkflowResult
+	17, // 44: contract.v1.WorkflowStep.task_template:type_name -> contract.v1.Task
+	33, // 45: contract.v1.WorkflowStep.input_bindings:type_name -> contract.v1.ResultBinding
+	34, // 46: contract.v1.WorkflowDefinition.steps:type_name -> contract.v1.WorkflowStep
+	17, // 47: contract.v1.SubmitWorkflowRequest.root_task:type_name -> contract.v1.Task
+	35, // 48: contract.v1.SubmitWorkflowRequest.workflow:type_name -> contract.v1.WorkflowDefinition
+	7,  // 49: contract.v1.WorkflowStepResult.status:type_name -> contract.v1.WorkflowStepStatus
+	18, // 50: contract.v1.WorkflowStepResult.result:type_name -> contract.v1.TaskResult
+	6,  // 51: contract.v1.WorkflowResult.status:type_name -> contract.v1.WorkflowStatus
+	37, // 52: contract.v1.WorkflowResult.step_results:type_name -> contract.v1.WorkflowStepResult
+	42, // 53: contract.v1.WorkflowResult.output:type_name -> google.protobuf.Struct
+	9,  // 54: contract.v1.WorkflowResult.error:type_name -> contract.v1.ErrorInfo
+	8,  // 55: contract.v1.WorkflowResult.trace:type_name -> contract.v1.TraceContext
+	43, // 56: contract.v1.WorkflowResult.created_at:type_name -> google.protobuf.Timestamp
+	43, // 57: contract.v1.WorkflowResult.completed_at:type_name -> google.protobuf.Timestamp
+	38, // 58: contract.v1.SubmitWorkflowResponse.result:type_name -> contract.v1.WorkflowResult
+	9,  // 59: contract.v1.SubmitWorkflowResponse.error:type_name -> contract.v1.ErrorInfo
+	17, // 60: contract.v1.ExecuteTaskRequest.task:type_name -> contract.v1.Task
+	18, // 61: contract.v1.ExecuteTaskResponse.result:type_name -> contract.v1.TaskResult
+	21, // 62: contract.v1.RegistryService.RegisterAgent:input_type -> contract.v1.RegisterAgentRequest
+	23, // 63: contract.v1.RegistryService.UnregisterAgent:input_type -> contract.v1.UnregisterAgentRequest
+	25, // 64: contract.v1.RegistryService.GetAgent:input_type -> contract.v1.GetAgentRequest
+	27, // 65: contract.v1.RegistryService.DiscoverAgents:input_type -> contract.v1.DiscoverAgentsRequest
+	29, // 66: contract.v1.RegistryService.ReportHealth:input_type -> contract.v1.ReportHealthRequest
+	31, // 67: contract.v1.OrchestratorService.SubmitTask:input_type -> contract.v1.SubmitTaskRequest
+	36, // 68: contract.v1.OrchestratorService.SubmitWorkflow:input_type -> contract.v1.SubmitWorkflowRequest
+	40, // 69: contract.v1.AgentService.ExecuteTask:input_type -> contract.v1.ExecuteTaskRequest
+	22, // 70: contract.v1.RegistryService.RegisterAgent:output_type -> contract.v1.RegisterAgentResponse
+	24, // 71: contract.v1.RegistryService.UnregisterAgent:output_type -> contract.v1.UnregisterAgentResponse
+	26, // 72: contract.v1.RegistryService.GetAgent:output_type -> contract.v1.GetAgentResponse
+	28, // 73: contract.v1.RegistryService.DiscoverAgents:output_type -> contract.v1.DiscoverAgentsResponse
+	30, // 74: contract.v1.RegistryService.ReportHealth:output_type -> contract.v1.ReportHealthResponse
+	32, // 75: contract.v1.OrchestratorService.SubmitTask:output_type -> contract.v1.SubmitTaskResponse
+	39, // 76: contract.v1.OrchestratorService.SubmitWorkflow:output_type -> contract.v1.SubmitWorkflowResponse
+	41, // 77: contract.v1.AgentService.ExecuteTask:output_type -> contract.v1.ExecuteTaskResponse
+	70, // [70:78] is the sub-list for method output_type
+	62, // [62:70] is the sub-list for method input_type
+	62, // [62:62] is the sub-list for extension type_name
+	62, // [62:62] is the sub-list for extension extendee
+	0,  // [0:62] is the sub-list for field type_name
 }
 
 func init() { file_contract_v1_contract_proto_init() }

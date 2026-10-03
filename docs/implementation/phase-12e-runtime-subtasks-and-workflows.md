@@ -655,7 +655,7 @@ Atualizado em 2026-10-03.
 12E.2 Contrato e validação             CONCLUÍDA
 12E.3 Workflow síncrono explícito      CONCLUÍDA
 12E.4 Dependências e paralelismo       CONCLUÍDA
-12E.5 Planejamento automático          PENDENTE
+12E.5 Planejamento automático          CONCLUÍDA
 12E.6 API assíncrona e persistência    PENDENTE
 12E.7 Migrar cenário heterogêneo       PENDENTE
 ```
@@ -687,6 +687,18 @@ são agregados em ordem topológica determinística. Testes com detector de race
 cobrem binding aninhado, execução concorrente limitada e propagação seletiva
 de falhas.
 
+A 12E.5 adicionou o `planning.Planner`, que transforma uma task de entrada com
+capability única `task-decomposition` em uma solicitação interna
+`WORKFLOW_PLANNING`. O planner é descoberto e executado pelo mesmo
+`TaskExecutor` dos demais agentes; o orchestrator não conhece provedores LLM.
+A saída estruturada é decodificada com schema fechado, convertida para
+`WorkflowDefinition` e submetida novamente ao validator antes de chegar ao
+engine. O limite é de uma expansão por root task e steps não podem solicitar
+`task-decomposition`, impedindo recursão. `SubmitTaskResponse` ganhou o campo
+compatível `workflow_result`, preservando `result` para tasks simples. O agente
+LLM passou a produzir o DAG completo, incluindo dependências, bindings e a
+extensão BDI necessária.
+
 Validação integrada realizada em 2026-10-03: o cenário isolado
 `scenarios/workflow-sequential` executou `first -> second`, ambos pelo agente
 `workflow-echo`, e retornou a saída do segundo step. Os eventos correlacionaram
@@ -694,9 +706,8 @@ workflow, run, step, task e trace, e o ambiente Docker foi removido após a
 verificação. Testes adicionais cobrem endpoint, store defensivo, ordem
 topológica, agregação, falha e propagação de `SKIPPED`.
 
-Próximo incremento: 12E.5, integrando um planner com capability
-`task-decomposition`, validação obrigatória da saída e expansão limitada de
-uma task natural antes da execução do workflow.
+Próximo incremento: 12E.6, expondo início, consulta e cancelamento assíncronos
+sobre o store de workflows, sem remover o endpoint síncrono existente.
 
 ### 12E.1 — Extrair `TaskExecutor`
 

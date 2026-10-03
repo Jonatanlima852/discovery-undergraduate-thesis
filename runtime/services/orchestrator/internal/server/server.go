@@ -12,6 +12,7 @@ import (
 	pb "tg/runtime/gen/go/contract/v1"
 	"tg/runtime/services/orchestrator/internal/events"
 	"tg/runtime/services/orchestrator/internal/execution"
+	"tg/runtime/services/orchestrator/internal/planning"
 	"tg/runtime/services/orchestrator/internal/workflow"
 )
 
@@ -20,6 +21,7 @@ type OrchestratorServer struct {
 	logger   *events.Logger
 	executor *execution.Executor
 	workflow *workflow.Engine
+	planner  *planning.Planner
 }
 
 func New(registryAddr string, logger *events.Logger, timeout ...time.Duration) *OrchestratorServer {
@@ -33,15 +35,14 @@ func New(registryAddr string, logger *events.Logger, timeout ...time.Duration) *
 		logger,
 		defaultTimeout,
 	)
+	validator := workflow.NewValidator(workflow.DefaultValidationLimits())
+	store := workflow.NewInMemoryStore()
+	engine := workflow.NewEngine(taskExecutor, validator, store, logger)
 	return &OrchestratorServer{
 		logger:   logger,
 		executor: taskExecutor,
-		workflow: workflow.NewEngine(
-			taskExecutor,
-			workflow.NewValidator(workflow.DefaultValidationLimits()),
-			workflow.NewInMemoryStore(),
-			logger,
-		),
+		workflow: engine,
+		planner:  planning.New(taskExecutor, validator),
 	}
 }
 
@@ -60,12 +61,26 @@ func (srv *OrchestratorServer) SubmitTask(ctx context.Context, req *pb.SubmitTas
 	}
 
 	slog.Info("task received", "task_id", task.TaskId, "goal", task.Goal)
-	srv.logger.Log(events.Event{
-		EventID: uuid.NewString(),
-		TaskID:  task.TaskId,
-		Type:    "TASK_CREATED",
-		TraceID: task.Trace.TraceId,
-	})
+	if srv.logger != nil {
+		srv.logger.Log(events.Event{
+			EventID: uuid.NewString(),
+			TaskID:  task.TaskId,
+			Type:    "TASK_CREATED",
+			TraceID: task.Trace.TraceId,
+		})
+	}
+	if planning.IsPlanningTask(task) {
+		definition, failure := srv.planner.Plan(ctx, task)
+		if failure != nil {
+			slog.Warn("workflow planning failed", "task_id", task.TaskId, "code", failure.Code, "error", failure.Message)
+			return &pb.SubmitTaskResponse{Error: failure}, nil
+		}
+		result, failure := srv.workflow.Execute(ctx, task, definition)
+		if failure != nil {
+			return &pb.SubmitTaskResponse{Error: failure}, nil
+		}
+		return &pb.SubmitTaskResponse{WorkflowResult: result}, nil
+	}
 
 	result, failure := srv.executor.Execute(ctx, task)
 	if failure != nil {

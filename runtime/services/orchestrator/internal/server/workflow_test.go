@@ -7,6 +7,7 @@ import (
 	"google.golang.org/protobuf/types/known/structpb"
 
 	pb "tg/runtime/gen/go/contract/v1"
+	"tg/runtime/services/orchestrator/internal/planning"
 	"tg/runtime/services/orchestrator/internal/workflow"
 )
 
@@ -18,6 +19,47 @@ func (workflowTaskExecutor) Execute(_ context.Context, task *pb.Task) (*pb.TaskR
 		TaskId: task.TaskId, AgentId: "fake-agent",
 		Status: pb.TaskStatus_TASK_STATUS_COMPLETED, Trace: task.Trace, Output: output,
 	}, nil
+}
+
+type automaticWorkflowExecutor struct{ calls int }
+
+func (e *automaticWorkflowExecutor) Execute(_ context.Context, task *pb.Task) (*pb.TaskResult, *pb.ErrorInfo) {
+	e.calls++
+	var output *structpb.Struct
+	if task.Type == "WORKFLOW_PLANNING" {
+		output, _ = structpb.NewStruct(map[string]any{
+			"workflow_id": "auto", "final_step_id": "work",
+			"steps": []any{map[string]any{
+				"step_id": "work", "type": "WORK", "goal": "execute planned work",
+				"payload": map[string]any{}, "required_capabilities": []any{"echo"},
+				"depends_on": []any{}, "input_bindings": []any{}, "bdi_goal": "",
+			}},
+		})
+	} else {
+		output, _ = structpb.NewStruct(map[string]any{"planned": true})
+	}
+	return &pb.TaskResult{TaskId: task.TaskId, AgentId: "fake", Status: pb.TaskStatus_TASK_STATUS_COMPLETED, Output: output}, nil
+}
+
+func TestSubmitTaskAutomaticallyPlansExplicitDecompositionCapability(t *testing.T) {
+	executor := &automaticWorkflowExecutor{}
+	validator := workflow.NewValidator(workflow.DefaultValidationLimits())
+	server := &OrchestratorServer{
+		planner:  planning.New(executor, validator),
+		workflow: workflow.NewEngine(executor, validator, workflow.NewInMemoryStore(), nil),
+	}
+	response, err := server.SubmitTask(context.Background(), &pb.SubmitTaskRequest{Task: &pb.Task{
+		Goal: "plan this", RequiredCapabilities: []string{planning.Capability},
+	}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if response.WorkflowResult == nil || response.WorkflowResult.Status != pb.WorkflowStatus_WORKFLOW_STATUS_COMPLETED {
+		t.Fatalf("response = %v", response)
+	}
+	if response.Result != nil || executor.calls != 2 {
+		t.Fatalf("response=%v calls=%d", response, executor.calls)
+	}
 }
 
 func TestSubmitWorkflowExecutesExplicitWorkflow(t *testing.T) {
