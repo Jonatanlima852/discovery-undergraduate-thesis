@@ -7,6 +7,7 @@ import grpc
 from google.protobuf import timestamp_pb2
 
 from contract.v1 import contract_pb2, contract_pb2_grpc
+from tg_sdk.models import Task, TaskResult
 
 log = logging.getLogger(__name__)
 
@@ -20,7 +21,7 @@ class _AgentServicer(contract_pb2_grpc.AgentServiceServicer):
     def ExecuteTask(self, request, context):
         self._agent._task_started()
         try:
-            result = self._agent.execute_task(request.task)
+            result = self._agent._execute_contract_task(request.task)
             return contract_pb2.ExecuteTaskResponse(result=result)
         finally:
             self._agent._task_finished()
@@ -92,6 +93,66 @@ class Agent:
         Subclasses devem sobrescrever este método com a lógica do agente.
         """
         raise NotImplementedError("subclasses devem implementar execute_task")
+
+    def handle(self, task: Task) -> TaskResult:
+        """Hook público para agentes novos baseados nos modelos do SDK.
+
+        Agentes existentes podem continuar sobrescrevendo ``execute_task`` com
+        mensagens protobuf. Novos agentes devem preferir ``handle``.
+        """
+        raise NotImplementedError("subclasses devem implementar handle")
+
+    def _execute_contract_task(self, raw_task):
+        """Adapta o contrato gRPC para APIs novas ou legadas do agente."""
+        try:
+            if type(self).handle is not Agent.handle:
+                result = self.handle(Task.from_proto(raw_task))
+            else:
+                result = self.execute_task(raw_task)
+
+            if isinstance(result, TaskResult):
+                return result.to_proto()
+            if isinstance(result, contract_pb2.TaskResult):
+                return result
+            raise TypeError("agent handler must return tg_sdk.TaskResult")
+        except ValueError as error:
+            return self._exception_result(
+                raw_task, contract_pb2.ERROR_CODE_INVALID_TASK, error, False
+            )
+        except TimeoutError as error:
+            return self._exception_result(
+                raw_task, contract_pb2.ERROR_CODE_TIMEOUT, error, True
+            )
+        except NotImplementedError as error:
+            return self._exception_result(
+                raw_task, contract_pb2.ERROR_CODE_EXECUTION_FAILED, error, False
+            )
+        except Exception as error:
+            log.exception(
+                "agent_id=%s unhandled task error task_id=%s error_type=%s",
+                self.agent_id,
+                raw_task.task_id,
+                type(error).__name__,
+            )
+            return self._exception_result(
+                raw_task, contract_pb2.ERROR_CODE_EXECUTION_FAILED, error, False
+            )
+
+    def _exception_result(self, task, code, error, retryable):
+        completed_at = timestamp_pb2.Timestamp()
+        completed_at.GetCurrentTime()
+        return contract_pb2.TaskResult(
+            task_id=task.task_id,
+            agent_id=self.agent_id,
+            status=contract_pb2.TASK_STATUS_FAILED,
+            completed_at=completed_at,
+            trace=task.trace,
+            error=contract_pb2.ErrorInfo(
+                code=code,
+                message=str(error) or type(error).__name__,
+                retryable=retryable,
+            ),
+        )
 
     def build_descriptor(self):
         return contract_pb2.AgentDescriptor(

@@ -2,11 +2,12 @@ import logging
 import os
 from dataclasses import dataclass
 
-from google.protobuf import json_format, struct_pb2, timestamp_pb2
+from google.protobuf import json_format, timestamp_pb2
 from pydantic import BaseModel
 
 from contract.v1 import contract_pb2
 from tg_sdk.agent import Agent
+from tg_sdk.models import mapping_to_struct
 
 log = logging.getLogger(__name__)
 
@@ -46,12 +47,6 @@ def _now():
     value = timestamp_pb2.Timestamp()
     value.GetCurrentTime()
     return value
-
-
-def _struct(value):
-    message = struct_pb2.Struct()
-    message.update(value)
-    return message
 
 
 class LlmAgent(Agent):
@@ -142,8 +137,10 @@ class LlmAgent(Agent):
                 status=contract_pb2.TASK_STATUS_COMPLETED,
                 completed_at=_now(),
                 trace=task.trace,
-                output=_struct(output),
-                metadata=_struct({"provider": "openai", "model": self.model}),
+                output=mapping_to_struct(output),
+                metadata=mapping_to_struct(
+                    {"provider": "openai", "model": self.model}
+                ),
             )
 
         return contract_pb2.TaskResult(

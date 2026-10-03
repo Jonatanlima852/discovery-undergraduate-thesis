@@ -1,34 +1,21 @@
 import uuid
 
 import grpc
-from google.protobuf import json_format, struct_pb2
 
 from contract.v1 import contract_pb2, contract_pb2_grpc
-
-
-def _struct(value):
-    message = struct_pb2.Struct()
-    message.update(value or {})
-    return message
+from tg_sdk.models import TaskResult, mapping_to_struct
 
 
 class ScenarioResult:
     def __init__(self, result):
         self.raw = result
-        self.task_id = result.task_id
-        self.agent_id = result.agent_id
-        self.status = contract_pb2.TaskStatus.Name(result.status)
-        self.output = (
-            json_format.MessageToDict(result.output)
-            if result.HasField("output")
-            else {}
-        )
-        self.metadata = (
-            json_format.MessageToDict(result.metadata)
-            if result.HasField("metadata")
-            else {}
-        )
-        self.error = result.error.message if result.HasField("error") else None
+        converted = TaskResult.from_proto(result)
+        self.task_id = converted.task_id
+        self.agent_id = converted.agent_id
+        self.status = converted.status
+        self.output = dict(converted.output)
+        self.metadata = dict(converted.metadata)
+        self.error = converted.error_message
 
     def assert_completed(self):
         if self.raw.status != contract_pb2.TASK_STATUS_COMPLETED:
@@ -68,7 +55,7 @@ class Scenario:
             task_id=str(uuid.uuid4()),
             type=task_type,
             goal=goal,
-            payload=_struct(payload),
+            payload=mapping_to_struct(payload),
             required_capabilities=list(capabilities),
             trace=contract_pb2.TraceContext(
                 trace_id=self.trace_id,
