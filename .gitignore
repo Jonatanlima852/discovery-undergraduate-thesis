@@ -40,6 +40,7 @@ build/
 # ── Resultados de benchmarks ──────────────────
 # Mantém a estrutura de pastas mas ignora arquivos de dados
 experiments/results/*.jsonl
+experiments/results/*.json
 experiments/results/*.csv
 experiments/results/*.png
 !experiments/results/.gitkeep

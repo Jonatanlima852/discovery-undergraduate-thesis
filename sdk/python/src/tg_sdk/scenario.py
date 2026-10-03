@@ -172,6 +172,10 @@ class Scenario:
         payload=None,
         bdi_goal=None,
         intention_id=None,
+        deadline_ms=0,
+        max_attempts=1,
+        backoff_ms=0,
+        exclude_failed_agent=False,
     ):
         task = contract_pb2.Task(
             task_id=str(uuid.uuid4()),
@@ -179,6 +183,12 @@ class Scenario:
             goal=goal,
             payload=mapping_to_struct(payload),
             required_capabilities=list(capabilities),
+            deadline_ms=deadline_ms,
+            retry_policy=contract_pb2.RetryPolicy(
+                max_attempts=max_attempts,
+                backoff_ms=backoff_ms,
+                exclude_failed_agent=exclude_failed_agent,
+            ),
             trace=contract_pb2.TraceContext(
                 trace_id=self.trace_id,
                 correlation_id=self.name,

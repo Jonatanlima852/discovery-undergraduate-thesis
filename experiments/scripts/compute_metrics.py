@@ -7,6 +7,8 @@ CREATED = "TASK_CREATED"
 ASSIGNED = "TASK_ASSIGNED"
 COMPLETED = "TASK_COMPLETED"
 FAILED = "TASK_FAILED"
+TIMEOUT = "TASK_TIMEOUT"
+REASSIGNED = "TASK_REASSIGNED"
 
 
 def parse_args():
@@ -58,6 +60,21 @@ def summarize_task(task_id, events):
     created_at = parse_timestamp(created["timestamp"])
     assigned_at = parse_timestamp(assigned["timestamp"]) if assigned else None
     finished_at = parse_timestamp(finished["timestamp"]) if finished else None
+    timeout_events = [event for event in events if event["type"] == TIMEOUT]
+    reassignment_events = [event for event in events if event["type"] == REASSIGNED]
+    recovery_ms = None
+    if timeout_events and reassignment_events:
+        timeout_at = parse_timestamp(timeout_events[0]["timestamp"])
+        next_reassignment = next(
+            (
+                parse_timestamp(event["timestamp"])
+                for event in reassignment_events
+                if parse_timestamp(event["timestamp"]) >= timeout_at
+            ),
+            None,
+        )
+        if next_reassignment:
+            recovery_ms = ms_between(timeout_at, next_reassignment)
 
     status = finished["type"] if finished else "IN_PROGRESS"
     trace_id = created.get("trace_id", "")
@@ -78,6 +95,8 @@ def summarize_task(task_id, events):
         "assignment_latency_ms": assignment_latency_ms,
         "execution_latency_ms": execution_latency_ms,
         "total_latency_ms": total_latency_ms,
+        "recovery_ms": recovery_ms,
+        "reassignment_count": len(reassignment_events),
     }
 
 
@@ -115,6 +134,8 @@ def write_csv(path, rows):
         "assignment_latency_ms",
         "execution_latency_ms",
         "total_latency_ms",
+        "recovery_ms",
+        "reassignment_count",
     ]
     with open(path, "w", newline="") as f:
         writer = csv.DictWriter(f, fieldnames=fieldnames)

@@ -2,6 +2,7 @@ package store
 
 import (
 	"fmt"
+	"sort"
 	"sync"
 	"time"
 
@@ -94,6 +95,9 @@ func (st *AgentStore) List(requiredCapabilities []string, statusFilter pb.AgentS
 		}
 		result = append(result, agent)
 	}
+	sort.Slice(result, func(i, j int) bool {
+		return result[i].AgentId < result[j].AgentId
+	})
 	return result
 }
 

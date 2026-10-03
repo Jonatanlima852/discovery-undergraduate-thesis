@@ -90,6 +90,28 @@ class ScenarioTests(unittest.TestCase):
         self.assertEqual(saved["trace_id"], scenario.trace_id)
         self.assertEqual(set(saved["results"]), {"decompose", "route"})
 
+    def test_submit_forwards_timeout_and_retry_policy(self):
+        stub = FakeOrchestrator([
+            response(task_id="one", agent_id="healthy")
+        ])
+        scenario = Scenario("retry", orchestrator_stub=stub)
+
+        scenario.submit(
+            "recover",
+            goal="test",
+            capabilities=["echo"],
+            deadline_ms=50,
+            max_attempts=3,
+            backoff_ms=10,
+            exclude_failed_agent=True,
+        )
+
+        task = stub.requests[0].task
+        self.assertEqual(task.deadline_ms, 50)
+        self.assertEqual(task.retry_policy.max_attempts, 3)
+        self.assertEqual(task.retry_policy.backoff_ms, 10)
+        self.assertTrue(task.retry_policy.exclude_failed_agent)
+
     def test_run_requires_entry_capability(self):
         scenario = Scenario("invalid", orchestrator_stub=FakeOrchestrator([]))
 

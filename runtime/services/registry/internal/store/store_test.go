@@ -121,3 +121,15 @@ func TestDeleteRemovesHealthRecord(t *testing.T) {
 		t.Fatal("GetHealth() after Delete() error = nil, want not found")
 	}
 }
+
+func TestListReturnsDeterministicAgentOrder(t *testing.T) {
+	agentStore := New()
+	agentStore.Save(testAgent("b-agent"))
+	agentStore.Save(testAgent("a-agent"))
+
+	agents := agentStore.List([]string{"echo"}, pb.AgentStatus_AGENT_STATUS_UNKNOWN)
+
+	if len(agents) != 2 || agents[0].AgentId != "a-agent" || agents[1].AgentId != "b-agent" {
+		t.Fatalf("agent order = %v, want [a-agent b-agent]", []string{agents[0].AgentId, agents[1].AgentId})
+	}
+}

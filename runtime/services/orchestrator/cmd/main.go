@@ -4,6 +4,7 @@ import (
 	"log/slog"
 	"net"
 	"os"
+	"time"
 
 	"google.golang.org/grpc"
 
@@ -25,6 +26,15 @@ func main() {
 	if eventsPath == "" {
 		eventsPath = "experiments/results/events.jsonl"
 	}
+	executionTimeout := 30 * time.Second
+	if configured := os.Getenv("EXECUTION_TIMEOUT"); configured != "" {
+		parsed, err := time.ParseDuration(configured)
+		if err != nil || parsed <= 0 {
+			slog.Error("invalid EXECUTION_TIMEOUT", "value", configured)
+			os.Exit(1)
+		}
+		executionTimeout = parsed
+	}
 
 	logger, err := events.NewLogger(eventsPath)
 	if err != nil {
@@ -40,9 +50,9 @@ func main() {
 	}
 
 	grpcServer := grpc.NewServer()
-	pb.RegisterOrchestratorServiceServer(grpcServer, server.New(registryAddr, logger))
+	pb.RegisterOrchestratorServiceServer(grpcServer, server.New(registryAddr, logger, executionTimeout))
 
-	slog.Info("orchestrator service started", "addr", addr, "registry", registryAddr)
+	slog.Info("orchestrator service started", "addr", addr, "registry", registryAddr, "execution_timeout", executionTimeout)
 	if err := grpcServer.Serve(lis); err != nil {
 		slog.Error("server stopped", "err", err)
 		os.Exit(1)
