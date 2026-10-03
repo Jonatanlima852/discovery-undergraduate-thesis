@@ -1,7 +1,12 @@
 from tg_sdk.agent import Agent
 from tg_sdk.bdi import BdiAgent, plan
 from tg_sdk.models import Task, TaskResult
-from tg_sdk.scenario import Scenario, ScenarioReport, ScenarioResult
+from tg_sdk.scenario import (
+    Scenario,
+    ScenarioReport,
+    ScenarioResult,
+    ScenarioWorkflowResult,
+)
 
 
 def __getattr__(name):
@@ -25,6 +30,7 @@ __all__ = [
     "Scenario",
     "ScenarioReport",
     "ScenarioResult",
+    "ScenarioWorkflowResult",
     "Task",
     "TaskResult",
     "llm_capability",

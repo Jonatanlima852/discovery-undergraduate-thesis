@@ -12,7 +12,7 @@ from typing import Any, Mapping
 import grpc
 
 from contract.v1 import contract_pb2, contract_pb2_grpc
-from tg_sdk.models import TaskResult, mapping_to_struct
+from tg_sdk.models import TaskResult, mapping_to_struct, struct_to_dict
 
 
 def _utc_now():
@@ -122,6 +122,54 @@ class ScenarioReport:
         return destination
 
 
+class ScenarioWorkflowResult:
+    def __init__(self, result):
+        self.raw = result
+        self.workflow_id = result.workflow_id
+        self.run_id = result.run_id
+        self.root_task_id = result.root_task_id
+        self.status = contract_pb2.WorkflowStatus.Name(result.status)
+        self.trace_id = result.trace.trace_id
+        self.output = (
+            struct_to_dict(result.output) if result.HasField("output") else {}
+        )
+        self.error = result.error.message if result.HasField("error") else None
+        self.steps = {}
+        for step in result.step_results:
+            self.steps[step.step_id] = {
+                "status": contract_pb2.WorkflowStepStatus.Name(step.status),
+                "result": ScenarioResult(step.result) if step.HasField("result") else None,
+            }
+
+    def assert_completed(self):
+        if self.raw.status != contract_pb2.WORKFLOW_STATUS_COMPLETED:
+            raise AssertionError(
+                f"workflow {self.workflow_id} did not complete: "
+                f"{self.error or self.status}"
+            )
+        return self
+
+    def to_dict(self):
+        return {
+            "workflow_id": self.workflow_id,
+            "run_id": self.run_id,
+            "root_task_id": self.root_task_id,
+            "trace_id": self.trace_id,
+            "status": self.status,
+            "output": self.output,
+            "error": self.error,
+            "steps": {
+                step_id: {
+                    "status": value["status"],
+                    "result": (
+                        value["result"].to_dict() if value["result"] else None
+                    ),
+                }
+                for step_id, value in self.steps.items()
+            },
+        }
+
+
 class Scenario:
     """Cliente de cenário com trace compartilhado e valores Python.
 
@@ -227,6 +275,84 @@ class Scenario:
         return self.report()
 
     ask = run
+
+    def submit_workflow(
+        self,
+        goal,
+        *,
+        steps,
+        final_step_id,
+        workflow_id=None,
+        task_type="WORKFLOW",
+        payload=None,
+    ):
+        root_task_id = str(uuid.uuid4())
+        root = contract_pb2.Task(
+            task_id=root_task_id,
+            type=task_type,
+            goal=goal,
+            payload=mapping_to_struct(payload),
+            trace=contract_pb2.TraceContext(
+                trace_id=self.trace_id,
+                correlation_id=self.name,
+            ),
+        )
+        workflow_steps = []
+        for declared in steps:
+            bindings = [
+                contract_pb2.ResultBinding(
+                    source_step_id=binding["source_step_id"],
+                    source_path=binding["source_path"],
+                    target_field=binding["target_field"],
+                )
+                for binding in declared.get("input_bindings", [])
+            ]
+            workflow_steps.append(contract_pb2.WorkflowStep(
+                step_id=declared["step_id"],
+                task_template=contract_pb2.Task(
+                    type=declared.get("type", "WORKFLOW_STEP"),
+                    goal=declared["goal"],
+                    payload=mapping_to_struct(declared.get("payload")),
+                    required_capabilities=list(
+                        declared.get(
+                            "required_capabilities",
+                            declared.get("capabilities", []),
+                        )
+                    ),
+                    deadline_ms=declared.get("deadline_ms", 0),
+                    retry_policy=contract_pb2.RetryPolicy(
+                        max_attempts=declared.get("max_attempts", 1),
+                        backoff_ms=declared.get("backoff_ms", 0),
+                        exclude_failed_agent=declared.get(
+                            "exclude_failed_agent", False
+                        ),
+                    ),
+                ),
+                depends_on=list(declared.get("depends_on", [])),
+                input_bindings=bindings,
+            ))
+
+        self._event("WORKFLOW_SUBMITTED", "workflow", task_id=root_task_id)
+        response = self._stub.SubmitWorkflow(contract_pb2.SubmitWorkflowRequest(
+            root_task=root,
+            workflow=contract_pb2.WorkflowDefinition(
+                workflow_id=workflow_id or str(uuid.uuid4()),
+                steps=workflow_steps,
+                final_step_id=final_step_id,
+            ),
+        ))
+        if response.HasField("error") and response.error.message:
+            self._event(
+                "WORKFLOW_REJECTED", "workflow", task_id=root_task_id,
+                error=response.error.message,
+            )
+            raise RuntimeError(f"workflow: {response.error.message}")
+        result = ScenarioWorkflowResult(response.result)
+        self._event(
+            "WORKFLOW_FINISHED", "workflow", task_id=root_task_id,
+            run_id=result.run_id, status=result.status,
+        )
+        return result
 
     def report(self):
         return ScenarioReport(

@@ -653,7 +653,7 @@ Atualizado em 2026-10-03.
 ```text
 12E.1 Extrair TaskExecutor             CONCLUÍDA (Fase 10)
 12E.2 Contrato e validação             CONCLUÍDA
-12E.3 Workflow síncrono explícito      PENDENTE
+12E.3 Workflow síncrono explícito      CONCLUÍDA
 12E.4 Dependências e paralelismo       PENDENTE
 12E.5 Planejamento automático          PENDENTE
 12E.6 API assíncrona e persistência    PENDENTE
@@ -671,8 +671,22 @@ vazias, decomposição recursiva, dependências ausentes ou repetidas, ciclos,
 bindings fora da allowlist e fontes que não sejam ancestrais do step. Onze
 testes unitários cobrem esses casos sem sleeps ou serviços externos.
 
-Próximo incremento: 12E.3, implementando `SubmitWorkflow` síncrono, store em
-memória, materialização de tasks sequenciais e resultado agregado.
+A 12E.3 implementou `SubmitWorkflow` síncrono, `WorkflowStore` em memória,
+ordenação topológica sequencial, materialização de tasks, propagação de falha,
+steps dependentes como `SKIPPED`, agregação do step final e eventos de workflow
+e step. A API `Scenario.submit_workflow()` expõe o endpoint usando somente
+valores Python. Bindings são rejeitados explicitamente até a 12E.4.
+
+Validação integrada realizada em 2026-10-03: o cenário isolado
+`scenarios/workflow-sequential` executou `first -> second`, ambos pelo agente
+`workflow-echo`, e retornou a saída do segundo step. Os eventos correlacionaram
+workflow, run, step, task e trace, e o ambiente Docker foi removido após a
+verificação. Testes adicionais cobrem endpoint, store defensivo, ordem
+topológica, agregação, falha e propagação de `SKIPPED`.
+
+Próximo incremento: 12E.4, implementando resolução segura de bindings,
+liberação de branches READY, paralelismo limitado e propagação de falhas em
+DAGs não lineares.
 
 ### 12E.1 — Extrair `TaskExecutor`
 

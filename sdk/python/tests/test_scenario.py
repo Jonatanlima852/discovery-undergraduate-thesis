@@ -32,6 +32,36 @@ class FakeOrchestrator:
         return reply
 
 
+class FakeWorkflowOrchestrator:
+    def __init__(self):
+        self.request = None
+
+    def SubmitWorkflow(self, request):
+        self.request = request
+        step_result = TaskResult(
+            task_id="task-final",
+            agent_id="agent-final",
+            status="TASK_STATUS_COMPLETED",
+            output={"answer": "done"},
+            trace={"trace_id": request.root_task.trace.trace_id},
+        ).to_proto()
+        return contract_pb2.SubmitWorkflowResponse(
+            result=contract_pb2.WorkflowResult(
+                workflow_id=request.workflow.workflow_id,
+                run_id="run-1",
+                root_task_id=request.root_task.task_id,
+                status=contract_pb2.WORKFLOW_STATUS_COMPLETED,
+                step_results=[contract_pb2.WorkflowStepResult(
+                    step_id="finish",
+                    status=contract_pb2.WORKFLOW_STEP_STATUS_COMPLETED,
+                    result=step_result,
+                )],
+                output=step_result.output,
+                trace=request.root_task.trace,
+            )
+        )
+
+
 class ScenarioTests(unittest.TestCase):
     def test_run_submits_declared_entry_and_returns_report(self):
         stub = FakeOrchestrator([
@@ -117,6 +147,35 @@ class ScenarioTests(unittest.TestCase):
 
         with self.assertRaisesRegex(ValueError, "entry_capability"):
             scenario.run("goal")
+
+    def test_submit_workflow_uses_python_values_and_returns_aggregate(self):
+        stub = FakeWorkflowOrchestrator()
+        scenario = Scenario("workflow", orchestrator_stub=stub)
+
+        result = scenario.submit_workflow(
+            "Execute duas etapas",
+            workflow_id="workflow-1",
+            final_step_id="finish",
+            steps=[
+                {
+                    "step_id": "start",
+                    "goal": "start",
+                    "capabilities": ["echo"],
+                },
+                {
+                    "step_id": "finish",
+                    "goal": "finish",
+                    "required_capabilities": ["echo"],
+                    "depends_on": ["start"],
+                },
+            ],
+        )
+
+        result.assert_completed()
+        self.assertEqual(result.output, {"answer": "done"})
+        self.assertEqual(result.steps["finish"]["result"].agent_id, "agent-final")
+        self.assertEqual(stub.request.workflow.steps[1].depends_on, ["start"])
+        self.assertEqual(stub.request.root_task.trace.trace_id, scenario.trace_id)
 
 
 if __name__ == "__main__":

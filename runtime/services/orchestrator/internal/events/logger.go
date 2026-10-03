@@ -10,13 +10,17 @@ import (
 
 // Event é a estrutura gravada em cada linha do JSONL.
 type Event struct {
-	EventID   string `json:"event_id"`
-	TaskID    string `json:"task_id"`
-	Type      string `json:"type"`
-	Timestamp string `json:"timestamp"`
-	AgentID   string `json:"agent_id,omitempty"`
-	TraceID   string `json:"trace_id,omitempty"`
-	Details   string `json:"details,omitempty"`
+	EventID    string `json:"event_id"`
+	TaskID     string `json:"task_id,omitempty"`
+	Type       string `json:"type"`
+	Timestamp  string `json:"timestamp"`
+	AgentID    string `json:"agent_id,omitempty"`
+	TraceID    string `json:"trace_id,omitempty"`
+	WorkflowID string `json:"workflow_id,omitempty"`
+	RunID      string `json:"run_id,omitempty"`
+	StepID     string `json:"step_id,omitempty"`
+	Attempt    int32  `json:"attempt,omitempty"`
+	Details    string `json:"details,omitempty"`
 }
 
 // Logger grava eventos em um arquivo JSONL com append thread-safe.
