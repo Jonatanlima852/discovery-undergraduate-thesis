@@ -1,8 +1,5 @@
-from google.protobuf import struct_pb2, timestamp_pb2
-
-from contract.v1 import contract_pb2
-
 from tg_sdk.agent import Agent
+from tg_sdk.models import Task, TaskResult
 
 
 def plan(_method=None, *, name=None, priority=0):
@@ -17,12 +14,6 @@ def plan(_method=None, *, name=None, priority=0):
     if _method is None:
         return decorate
     return decorate(_method)
-
-
-def _now():
-    ts = timestamp_pb2.Timestamp()
-    ts.GetCurrentTime()
-    return ts
 
 
 class BdiAgent(Agent):
@@ -88,6 +79,8 @@ class BdiAgent(Agent):
                     }
                     candidate["output"] = output
                 return candidate
+            invoke._tg_plan_name = metadata["name"]
+            invoke._tg_plan_priority = metadata["priority"]
             wrapped.append(invoke)
         return wrapped
 
@@ -121,17 +114,16 @@ class BdiAgent(Agent):
 
     # --- consumo opcional de Task.bdi (BdiExtension) ---
 
-    def _apply_external_bdi(self, task):
+    def _apply_external_bdi(self, task: Task):
         """Se a task chegar com BdiExtension preenchida, dá à subclasse
         a chance de incorporar as crenças externas antes de deliberar."""
-        if not task.HasField("bdi"):
-            return
-        if task.bdi.beliefs:
-            self.merge_external_beliefs(task.bdi.beliefs)
+        beliefs = task.bdi.get("beliefs")
+        if beliefs:
+            self.merge_external_beliefs(beliefs)
 
     # --- comportamento genérico de seleção e execução ---
 
-    def select_plan(self, desire):
+    def deliberate(self, desire):
         """Avalia todos os planos aplicáveis da biblioteca e escolhe a
         intenção do agente — o melhor entre eles, não o primeiro.
 
@@ -145,21 +137,36 @@ class BdiAgent(Agent):
         Devolve None se nenhum plano se aplicar.
         """
         applicable = []
+        evaluated = []
         for plan_fn in self.plan_library:
-            plan = plan_fn(desire, self.beliefs)
-            if plan is not None:
-                applicable.append(plan)
+            candidate = plan_fn(desire, self.beliefs)
+            name = getattr(plan_fn, "_tg_plan_name", plan_fn.__name__)
+            if candidate is None:
+                evaluated.append({"name": name, "applicable": False})
+                continue
+            applicable.append(candidate)
+            evaluated.append({
+                "name": candidate.get("name", name),
+                "applicable": True,
+                "cost": candidate.get("cost"),
+                "reasoning_summary": candidate.get("reasoning_summary", ""),
+            })
 
         if not applicable:
-            return None
+            return None, evaluated
 
         with_cost = [plan for plan in applicable if plan.get("cost") is not None]
         if with_cost:
-            return min(with_cost, key=lambda plan: plan["cost"])
+            return min(with_cost, key=lambda plan: plan["cost"]), evaluated
 
-        return applicable[0]
+        return applicable[0], evaluated
 
-    def execute_task(self, task):
+    def select_plan(self, desire):
+        """Compatibilidade: devolve somente o plano escolhido."""
+        selected, _ = self.deliberate(desire)
+        return selected
+
+    def handle(self, task: Task) -> TaskResult:
         self._apply_external_bdi(task)
 
         # Subclasses novas implementam desire(); as antigas continuam
@@ -171,57 +178,58 @@ class BdiAgent(Agent):
         if desire is None:
             return self._failed_result(
                 task,
-                code=contract_pb2.ERROR_CODE_INVALID_TASK,
+                code="ERROR_CODE_INVALID_TASK",
                 message="não foi possível extrair o desejo da task (payload incompleto)",
                 retryable=False,
             )
 
-        plan = self.select_plan(desire)
+        plan, evaluated = self.deliberate(desire)
         if plan is None:
             return self._failed_result(
                 task,
-                code=contract_pb2.ERROR_CODE_EXECUTION_FAILED,
+                code="ERROR_CODE_EXECUTION_FAILED",
                 message="nenhum plano da biblioteca se aplica a esse desejo",
                 retryable=False,
             )
 
-        return self._completed_result(task, plan)
+        return self._completed_result(task, plan, evaluated)
+
+    def execute_task(self, task):
+        """Compatibilidade temporária com chamadas locais baseadas em protobuf."""
+        friendly = task if isinstance(task, Task) else Task.from_proto(task)
+        result = self.handle(friendly)
+        return result if isinstance(task, Task) else result.to_proto()
 
     # --- montagem do TaskResult ---
 
-    def _completed_result(self, task, plan):
-        output = struct_pb2.Struct()
-        output.update(plan.get("output", {}))
-
+    def _completed_result(self, task, plan, evaluated):
         metadata_fields = {
             "selected_plan": plan["name"],
             "reasoning_summary": plan["reasoning_summary"],
+            "evaluated_plans": evaluated,
         }
         # se quem submeteu a task já trouxe um intention_id (BdiExtension),
         # devolvemos o mesmo identificador — permite correlacionar a
         # intenção combinada entre agentes através do contrato comum
-        if task.HasField("bdi") and task.bdi.intention_id:
-            metadata_fields["intention_id"] = task.bdi.intention_id
+        if task.bdi.get("intention_id"):
+            metadata_fields["intention_id"] = task.bdi["intention_id"]
 
-        metadata = struct_pb2.Struct()
-        metadata.update(metadata_fields)
-
-        return contract_pb2.TaskResult(
+        return TaskResult(
             task_id=task.task_id,
             agent_id=self.agent_id,
-            status=contract_pb2.TASK_STATUS_COMPLETED,
-            completed_at=_now(),
+            status="TASK_STATUS_COMPLETED",
             trace=task.trace,
-            output=output,
-            metadata=metadata,
+            output=plan.get("output", {}),
+            metadata=metadata_fields,
         )
 
     def _failed_result(self, task, code, message, retryable):
-        return contract_pb2.TaskResult(
+        return TaskResult(
             task_id=task.task_id,
             agent_id=self.agent_id,
-            status=contract_pb2.TASK_STATUS_FAILED,
-            completed_at=_now(),
+            status="TASK_STATUS_FAILED",
             trace=task.trace,
-            error=contract_pb2.ErrorInfo(code=code, message=message, retryable=retryable),
+            error_code=code,
+            error_message=message,
+            retryable=retryable,
         )

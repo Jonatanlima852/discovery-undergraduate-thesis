@@ -24,7 +24,7 @@ class MeetingSchedulerAgent(BdiAgent):
     agente precisa avaliar compromissos (quórum parcial, desvio de
     horário) e justificar a escolha."""
 
-    def extract_desire(self, task):
+    def desire(self, task):
         """Lê participantes, duração e horário preferido de task.payload.
 
         Campos esperados:
@@ -32,23 +32,22 @@ class MeetingSchedulerAgent(BdiAgent):
           duration_hours       → número (duração da reunião em horas)
           preferred_start_hour → número (horário preferido de início)
         """
-        fields = task.payload.fields
-        participants = fields.get("participants")
-        duration = fields.get("duration_hours")
-        preferred = fields.get("preferred_start_hour")
+        participants = task.payload.get("participants")
+        duration = task.payload.get("duration_hours")
+        preferred = task.payload.get("preferred_start_hour")
 
         if participants is None or duration is None or preferred is None:
             return None
 
         return {
-            "participants": [v.string_value for v in participants.list_value.values],
-            "duration_hours": int(duration.number_value),
-            "preferred_start_hour": int(preferred.number_value),
+            "participants": list(participants),
+            "duration_hours": int(duration),
+            "preferred_start_hour": int(preferred),
         }
 
-    def execute_task(self, task):
+    def handle(self, task):
         log.info("task received task_id=%s goal=%s", task.task_id, task.goal)
-        result = super().execute_task(task)
+        result = super().handle(task)
         log.info("task finished task_id=%s status=%s", task.task_id, result.status)
         return result
 

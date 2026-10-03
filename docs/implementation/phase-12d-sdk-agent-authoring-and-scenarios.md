@@ -248,7 +248,7 @@ Atualizado em 2026-10-03.
 
 ```text
 12D.1 Modelos Python amigáveis       CONCLUÍDA
-12D.2 BdiAgent declarativo           EM ANDAMENTO
+12D.2 BdiAgent declarativo           CONCLUÍDA
 12D.3 LlmAgent declarativo           PARCIAL
 12D.4 Runtime de cenário             PARCIAL
 12D.5 Deployment por cenário         PENDENTE
@@ -262,9 +262,15 @@ protobuf. `ValueError`, `TimeoutError` e falhas de execução são convertidos e
 `ErrorInfo` estável. Os testes cobrem round-trip, compatibilidade e mapeamento
 de erros.
 
-Próximo incremento: concluir a 12D.2, migrando os agentes BDI de domínio para
-`tg_sdk.Task`/`TaskResult`, removendo imports de protobuf e registrando todos
-os planos avaliados na metadata da deliberação.
+A 12D.2 migrou o ciclo do `BdiAgent` para `tg_sdk.Task`/`TaskResult`, manteve
+um adaptador temporário para chamadas protobuf existentes e passou a registrar
+`evaluated_plans` na metadata, incluindo aplicabilidade, custo e resumo. Os
+agentes de rotas e agendamento, além da demo standalone, não importam mais
+protobuf no código de domínio.
+
+Próximo incremento: concluir a 12D.3, migrando `LlmAgent` e o agente LLM de
+domínio para os modelos públicos, adicionando métricas de uso/latência e
+reforçando a rejeição de campos operacionais na saída do modelo.
 
 ### 12D.1 — Modelos Python amigáveis
 

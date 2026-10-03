@@ -15,8 +15,7 @@ import sys
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../../sdk/python/src"))
 sys.path.insert(0, os.path.dirname(__file__))
 
-from contract.v1 import contract_pb2
-from google.protobuf import struct_pb2
+from tg_sdk import Task
 
 from beliefs import CALENDARS
 from plans import PLAN_LIBRARY
@@ -51,17 +50,15 @@ SCENARIOS = [
 
 
 def make_task(scenario, task_id):
-    payload = struct_pb2.Struct()
-    payload.update({
-        "participants": scenario["participants"],
-        "duration_hours": scenario["duration_hours"],
-        "preferred_start_hour": scenario["preferred_start_hour"],
-    })
-    return contract_pb2.Task(
+    return Task(
         task_id=task_id,
         goal="Marcar uma reunião",
-        payload=payload,
-        trace=contract_pb2.TraceContext(trace_id=f"trace-{task_id}"),
+        payload={
+            "participants": scenario["participants"],
+            "duration_hours": scenario["duration_hours"],
+            "preferred_start_hour": scenario["preferred_start_hour"],
+        },
+        trace={"trace_id": f"trace-{task_id}"},
     )
 
 
@@ -117,7 +114,7 @@ def main():
 
     for index, scenario in enumerate(SCENARIOS, start=1):
         task = make_task(scenario, task_id=f"demo-{index}")
-        desire = agent.extract_desire(task)
+        desire = agent.desire(task)
 
         print(f"\n=== Cenário {index}: {scenario['description']} ===")
         print(f"  desejo: reunir {desire['participants']} por {desire['duration_hours']}h, "

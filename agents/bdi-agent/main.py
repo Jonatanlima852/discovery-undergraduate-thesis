@@ -47,17 +47,17 @@ class RoutePlanningAgent(BdiAgent):
            agente LLM) descreveu o objetivo em linguagem natural via
            BdiExtension em vez de montar o payload estruturado.
         """
-        origin = task.payload.fields.get("origin")
-        destination = task.payload.fields.get("destination")
+        origin = task.payload.get("origin")
+        destination = task.payload.get("destination")
         if origin is not None and destination is not None:
-            return {"origin": origin.string_value, "destination": destination.string_value}
+            return {"origin": str(origin), "destination": str(destination)}
 
-        if task.HasField("bdi") and task.bdi.goal:
-            match = _GOAL_ROUTE_PATTERN.search(task.bdi.goal)
+        if task.bdi.get("goal"):
+            match = _GOAL_ROUTE_PATTERN.search(task.bdi["goal"])
             if match:
                 log.info(
                     "desejo extraído de task.bdi.goal task_id=%s goal=%r",
-                    task.task_id, task.bdi.goal,
+                    task.task_id, task.bdi["goal"],
                 )
                 return {"origin": match.group("origin"), "destination": match.group("destination")}
 
@@ -151,9 +151,9 @@ class RoutePlanningAgent(BdiAgent):
         if added:
             log.info("crenças externas mescladas via task.bdi.beliefs: %d rota(s)", added)
 
-    def execute_task(self, task):
+    def handle(self, task):
         log.info("task received task_id=%s goal=%s", task.task_id, task.goal)
-        result = super().execute_task(task)
+        result = super().handle(task)
         log.info("task finished task_id=%s status=%s", task.task_id, result.status)
         return result
 

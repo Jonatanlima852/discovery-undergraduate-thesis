@@ -84,6 +84,9 @@ class AuthoringApiTests(unittest.TestCase):
         self.assertEqual(result.status, contract_pb2.TASK_STATUS_COMPLETED)
         self.assertEqual(result.metadata["selected_plan"], "cheap")
         self.assertEqual(result.output["choice"], "B")
+        evaluated = list(result.metadata["evaluated_plans"])
+        self.assertEqual([item["name"] for item in evaluated], ["cheap", "expensive"])
+        self.assertTrue(all(item["applicable"] for item in evaluated))
 
     def test_llm_dispatches_capability_and_builds_contract_result(self):
         agent = ExampleLlmAgent(
