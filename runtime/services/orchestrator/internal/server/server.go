@@ -10,7 +10,7 @@ import (
 	"google.golang.org/grpc/status"
 
 	pb "tg/runtime/gen/go/contract/v1"
-	"tg/runtime/services/orchestrator/internal/events"
+	"tg/runtime/services/internal/events"
 	"tg/runtime/services/orchestrator/internal/execution"
 	"tg/runtime/services/orchestrator/internal/planning"
 	"tg/runtime/services/orchestrator/internal/workflow"

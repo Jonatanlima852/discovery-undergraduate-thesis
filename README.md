@@ -46,6 +46,7 @@ Cada cenário possui uma topologia Docker isolada e instruções próprias:
 - [workflow sequencial](scenarios/workflow-sequential/README.md);
 - [timeout e reassignment](scenarios/failure-reassignment/README.md);
 - [cooperação LLM + BDI](scenarios/heterogeneous-route/README.md).
+- [mensageria direta entre agentes](scenarios/messaging-basic/README.md).
 
 O cenário LLM + BDI exige uma chave da OpenAI. Antes de executá-lo:
 

@@ -1,4 +1,5 @@
 from tg_sdk.agent import Agent
+from tg_sdk.message import Message, MessagingClient
 from tg_sdk.bdi import BdiAgent, plan
 from tg_sdk.models import Task, TaskResult
 from tg_sdk.scenario import (
@@ -26,6 +27,8 @@ __all__ = [
     "BdiAgent",
     "LlmAgent",
     "LlmValidationError",
+    "Message",
+    "MessagingClient",
     "Prompt",
     "Scenario",
     "ScenarioReport",

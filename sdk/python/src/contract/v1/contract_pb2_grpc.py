@@ -25,6 +25,121 @@ if _version_not_supported:
     )
 
 
+class MessagingServiceStub(object):
+    """Missing associated documentation comment in .proto file."""
+
+    def __init__(self, channel):
+        """Constructor.
+
+        Args:
+            channel: A grpc.Channel.
+        """
+        self.PublishMessage = channel.unary_unary(
+                '/contract.v1.MessagingService/PublishMessage',
+                request_serializer=contract_dot_v1_dot_contract__pb2.PublishMessageRequest.SerializeToString,
+                response_deserializer=contract_dot_v1_dot_contract__pb2.PublishMessageResponse.FromString,
+                _registered_method=True)
+        self.StreamMessages = channel.unary_stream(
+                '/contract.v1.MessagingService/StreamMessages',
+                request_serializer=contract_dot_v1_dot_contract__pb2.StreamMessagesRequest.SerializeToString,
+                response_deserializer=contract_dot_v1_dot_contract__pb2.MessageEnvelope.FromString,
+                _registered_method=True)
+
+
+class MessagingServiceServicer(object):
+    """Missing associated documentation comment in .proto file."""
+
+    def PublishMessage(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def StreamMessages(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+
+def add_MessagingServiceServicer_to_server(servicer, server):
+    rpc_method_handlers = {
+            'PublishMessage': grpc.unary_unary_rpc_method_handler(
+                    servicer.PublishMessage,
+                    request_deserializer=contract_dot_v1_dot_contract__pb2.PublishMessageRequest.FromString,
+                    response_serializer=contract_dot_v1_dot_contract__pb2.PublishMessageResponse.SerializeToString,
+            ),
+            'StreamMessages': grpc.unary_stream_rpc_method_handler(
+                    servicer.StreamMessages,
+                    request_deserializer=contract_dot_v1_dot_contract__pb2.StreamMessagesRequest.FromString,
+                    response_serializer=contract_dot_v1_dot_contract__pb2.MessageEnvelope.SerializeToString,
+            ),
+    }
+    generic_handler = grpc.method_handlers_generic_handler(
+            'contract.v1.MessagingService', rpc_method_handlers)
+    server.add_generic_rpc_handlers((generic_handler,))
+    server.add_registered_method_handlers('contract.v1.MessagingService', rpc_method_handlers)
+
+
+ # This class is part of an EXPERIMENTAL API.
+class MessagingService(object):
+    """Missing associated documentation comment in .proto file."""
+
+    @staticmethod
+    def PublishMessage(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/contract.v1.MessagingService/PublishMessage',
+            contract_dot_v1_dot_contract__pb2.PublishMessageRequest.SerializeToString,
+            contract_dot_v1_dot_contract__pb2.PublishMessageResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def StreamMessages(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_stream(
+            request,
+            target,
+            '/contract.v1.MessagingService/StreamMessages',
+            contract_dot_v1_dot_contract__pb2.StreamMessagesRequest.SerializeToString,
+            contract_dot_v1_dot_contract__pb2.MessageEnvelope.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+
 class RegistryServiceStub(object):
     """Missing associated documentation comment in .proto file."""
 

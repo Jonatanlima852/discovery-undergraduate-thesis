@@ -19,6 +19,150 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
+	MessagingService_PublishMessage_FullMethodName = "/contract.v1.MessagingService/PublishMessage"
+	MessagingService_StreamMessages_FullMethodName = "/contract.v1.MessagingService/StreamMessages"
+)
+
+// MessagingServiceClient is the client API for MessagingService service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+type MessagingServiceClient interface {
+	PublishMessage(ctx context.Context, in *PublishMessageRequest, opts ...grpc.CallOption) (*PublishMessageResponse, error)
+	StreamMessages(ctx context.Context, in *StreamMessagesRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[MessageEnvelope], error)
+}
+
+type messagingServiceClient struct {
+	cc grpc.ClientConnInterface
+}
+
+func NewMessagingServiceClient(cc grpc.ClientConnInterface) MessagingServiceClient {
+	return &messagingServiceClient{cc}
+}
+
+func (c *messagingServiceClient) PublishMessage(ctx context.Context, in *PublishMessageRequest, opts ...grpc.CallOption) (*PublishMessageResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(PublishMessageResponse)
+	err := c.cc.Invoke(ctx, MessagingService_PublishMessage_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *messagingServiceClient) StreamMessages(ctx context.Context, in *StreamMessagesRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[MessageEnvelope], error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	stream, err := c.cc.NewStream(ctx, &MessagingService_ServiceDesc.Streams[0], MessagingService_StreamMessages_FullMethodName, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &grpc.GenericClientStream[StreamMessagesRequest, MessageEnvelope]{ClientStream: stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type MessagingService_StreamMessagesClient = grpc.ServerStreamingClient[MessageEnvelope]
+
+// MessagingServiceServer is the server API for MessagingService service.
+// All implementations must embed UnimplementedMessagingServiceServer
+// for forward compatibility.
+type MessagingServiceServer interface {
+	PublishMessage(context.Context, *PublishMessageRequest) (*PublishMessageResponse, error)
+	StreamMessages(*StreamMessagesRequest, grpc.ServerStreamingServer[MessageEnvelope]) error
+	mustEmbedUnimplementedMessagingServiceServer()
+}
+
+// UnimplementedMessagingServiceServer must be embedded to have
+// forward compatible implementations.
+//
+// NOTE: this should be embedded by value instead of pointer to avoid a nil
+// pointer dereference when methods are called.
+type UnimplementedMessagingServiceServer struct{}
+
+func (UnimplementedMessagingServiceServer) PublishMessage(context.Context, *PublishMessageRequest) (*PublishMessageResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method PublishMessage not implemented")
+}
+func (UnimplementedMessagingServiceServer) StreamMessages(*StreamMessagesRequest, grpc.ServerStreamingServer[MessageEnvelope]) error {
+	return status.Error(codes.Unimplemented, "method StreamMessages not implemented")
+}
+func (UnimplementedMessagingServiceServer) mustEmbedUnimplementedMessagingServiceServer() {}
+func (UnimplementedMessagingServiceServer) testEmbeddedByValue()                          {}
+
+// UnsafeMessagingServiceServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to MessagingServiceServer will
+// result in compilation errors.
+type UnsafeMessagingServiceServer interface {
+	mustEmbedUnimplementedMessagingServiceServer()
+}
+
+func RegisterMessagingServiceServer(s grpc.ServiceRegistrar, srv MessagingServiceServer) {
+	// If the following call panics, it indicates UnimplementedMessagingServiceServer was
+	// embedded by pointer and is nil.  This will cause panics if an
+	// unimplemented method is ever invoked, so we test this at initialization
+	// time to prevent it from happening at runtime later due to I/O.
+	if t, ok := srv.(interface{ testEmbeddedByValue() }); ok {
+		t.testEmbeddedByValue()
+	}
+	s.RegisterService(&MessagingService_ServiceDesc, srv)
+}
+
+func _MessagingService_PublishMessage_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PublishMessageRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MessagingServiceServer).PublishMessage(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: MessagingService_PublishMessage_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MessagingServiceServer).PublishMessage(ctx, req.(*PublishMessageRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _MessagingService_StreamMessages_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(StreamMessagesRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(MessagingServiceServer).StreamMessages(m, &grpc.GenericServerStream[StreamMessagesRequest, MessageEnvelope]{ServerStream: stream})
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type MessagingService_StreamMessagesServer = grpc.ServerStreamingServer[MessageEnvelope]
+
+// MessagingService_ServiceDesc is the grpc.ServiceDesc for MessagingService service.
+// It's only intended for direct use with grpc.RegisterService,
+// and not to be introspected or modified (even as a copy)
+var MessagingService_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "contract.v1.MessagingService",
+	HandlerType: (*MessagingServiceServer)(nil),
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "PublishMessage",
+			Handler:    _MessagingService_PublishMessage_Handler,
+		},
+	},
+	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "StreamMessages",
+			Handler:       _MessagingService_StreamMessages_Handler,
+			ServerStreams: true,
+		},
+	},
+	Metadata: "contract/v1/contract.proto",
+}
+
+const (
 	RegistryService_RegisterAgent_FullMethodName   = "/contract.v1.RegistryService/RegisterAgent"
 	RegistryService_UnregisterAgent_FullMethodName = "/contract.v1.RegistryService/UnregisterAgent"
 	RegistryService_GetAgent_FullMethodName        = "/contract.v1.RegistryService/GetAgent"

@@ -10,7 +10,7 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 
 	pb "tg/runtime/gen/go/contract/v1"
-	"tg/runtime/services/orchestrator/internal/events"
+	"tg/runtime/services/internal/events"
 )
 
 type TaskExecutor interface {

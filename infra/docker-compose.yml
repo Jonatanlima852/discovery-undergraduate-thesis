@@ -27,6 +27,18 @@ services:
     depends_on:
       - registry
 
+  messaging:
+    build:
+      context: ..
+      dockerfile: runtime/services/messaging/Dockerfile
+    ports:
+      - "50053:50053"
+    environment:
+      MESSAGING_ADDR: ":50053"
+      EVENTS_PATH: "/data/message-events.jsonl"
+    volumes:
+      - events_data:/data
+
   mock-agent:
     build:
       context: ..

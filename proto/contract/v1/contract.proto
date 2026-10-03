@@ -268,6 +268,21 @@ message MessageEnvelope {
   google.protobuf.Struct metadata = 13;
 }
 
+message MessageAck {
+  string message_id = 1;
+  bool accepted      = 2;
+  ErrorInfo error    = 3;
+}
+
+message PublishMessageRequest { MessageEnvelope message = 1; }
+message PublishMessageResponse { MessageAck ack = 1; }
+message StreamMessagesRequest { string receiver_id = 1; }
+
+service MessagingService {
+  rpc PublishMessage (PublishMessageRequest) returns (PublishMessageResponse);
+  rpc StreamMessages (StreamMessagesRequest) returns (stream MessageEnvelope);
+}
+
 // ─────────────────────────────────────────────
 // RegistryService
 // Responsável por registrar e descobrir agentes.

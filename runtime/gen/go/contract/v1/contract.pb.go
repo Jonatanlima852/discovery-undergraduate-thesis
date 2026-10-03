@@ -1816,6 +1816,198 @@ func (x *MessageEnvelope) GetMetadata() *structpb.Struct {
 	return nil
 }
 
+type MessageAck struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	MessageId     string                 `protobuf:"bytes,1,opt,name=message_id,json=messageId,proto3" json:"message_id,omitempty"`
+	Accepted      bool                   `protobuf:"varint,2,opt,name=accepted,proto3" json:"accepted,omitempty"`
+	Error         *ErrorInfo             `protobuf:"bytes,3,opt,name=error,proto3" json:"error,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *MessageAck) Reset() {
+	*x = MessageAck{}
+	mi := &file_contract_v1_contract_proto_msgTypes[13]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *MessageAck) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*MessageAck) ProtoMessage() {}
+
+func (x *MessageAck) ProtoReflect() protoreflect.Message {
+	mi := &file_contract_v1_contract_proto_msgTypes[13]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use MessageAck.ProtoReflect.Descriptor instead.
+func (*MessageAck) Descriptor() ([]byte, []int) {
+	return file_contract_v1_contract_proto_rawDescGZIP(), []int{13}
+}
+
+func (x *MessageAck) GetMessageId() string {
+	if x != nil {
+		return x.MessageId
+	}
+	return ""
+}
+
+func (x *MessageAck) GetAccepted() bool {
+	if x != nil {
+		return x.Accepted
+	}
+	return false
+}
+
+func (x *MessageAck) GetError() *ErrorInfo {
+	if x != nil {
+		return x.Error
+	}
+	return nil
+}
+
+type PublishMessageRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Message       *MessageEnvelope       `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *PublishMessageRequest) Reset() {
+	*x = PublishMessageRequest{}
+	mi := &file_contract_v1_contract_proto_msgTypes[14]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *PublishMessageRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PublishMessageRequest) ProtoMessage() {}
+
+func (x *PublishMessageRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_contract_v1_contract_proto_msgTypes[14]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PublishMessageRequest.ProtoReflect.Descriptor instead.
+func (*PublishMessageRequest) Descriptor() ([]byte, []int) {
+	return file_contract_v1_contract_proto_rawDescGZIP(), []int{14}
+}
+
+func (x *PublishMessageRequest) GetMessage() *MessageEnvelope {
+	if x != nil {
+		return x.Message
+	}
+	return nil
+}
+
+type PublishMessageResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Ack           *MessageAck            `protobuf:"bytes,1,opt,name=ack,proto3" json:"ack,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *PublishMessageResponse) Reset() {
+	*x = PublishMessageResponse{}
+	mi := &file_contract_v1_contract_proto_msgTypes[15]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *PublishMessageResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PublishMessageResponse) ProtoMessage() {}
+
+func (x *PublishMessageResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_contract_v1_contract_proto_msgTypes[15]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PublishMessageResponse.ProtoReflect.Descriptor instead.
+func (*PublishMessageResponse) Descriptor() ([]byte, []int) {
+	return file_contract_v1_contract_proto_rawDescGZIP(), []int{15}
+}
+
+func (x *PublishMessageResponse) GetAck() *MessageAck {
+	if x != nil {
+		return x.Ack
+	}
+	return nil
+}
+
+type StreamMessagesRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ReceiverId    string                 `protobuf:"bytes,1,opt,name=receiver_id,json=receiverId,proto3" json:"receiver_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *StreamMessagesRequest) Reset() {
+	*x = StreamMessagesRequest{}
+	mi := &file_contract_v1_contract_proto_msgTypes[16]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *StreamMessagesRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*StreamMessagesRequest) ProtoMessage() {}
+
+func (x *StreamMessagesRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_contract_v1_contract_proto_msgTypes[16]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use StreamMessagesRequest.ProtoReflect.Descriptor instead.
+func (*StreamMessagesRequest) Descriptor() ([]byte, []int) {
+	return file_contract_v1_contract_proto_rawDescGZIP(), []int{16}
+}
+
+func (x *StreamMessagesRequest) GetReceiverId() string {
+	if x != nil {
+		return x.ReceiverId
+	}
+	return ""
+}
+
 type RegisterAgentRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Agent         *AgentDescriptor       `protobuf:"bytes,1,opt,name=agent,proto3" json:"agent,omitempty"`
@@ -1825,7 +2017,7 @@ type RegisterAgentRequest struct {
 
 func (x *RegisterAgentRequest) Reset() {
 	*x = RegisterAgentRequest{}
-	mi := &file_contract_v1_contract_proto_msgTypes[13]
+	mi := &file_contract_v1_contract_proto_msgTypes[17]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1837,7 +2029,7 @@ func (x *RegisterAgentRequest) String() string {
 func (*RegisterAgentRequest) ProtoMessage() {}
 
 func (x *RegisterAgentRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_contract_v1_contract_proto_msgTypes[13]
+	mi := &file_contract_v1_contract_proto_msgTypes[17]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1850,7 +2042,7 @@ func (x *RegisterAgentRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RegisterAgentRequest.ProtoReflect.Descriptor instead.
 func (*RegisterAgentRequest) Descriptor() ([]byte, []int) {
-	return file_contract_v1_contract_proto_rawDescGZIP(), []int{13}
+	return file_contract_v1_contract_proto_rawDescGZIP(), []int{17}
 }
 
 func (x *RegisterAgentRequest) GetAgent() *AgentDescriptor {
@@ -1870,7 +2062,7 @@ type RegisterAgentResponse struct {
 
 func (x *RegisterAgentResponse) Reset() {
 	*x = RegisterAgentResponse{}
-	mi := &file_contract_v1_contract_proto_msgTypes[14]
+	mi := &file_contract_v1_contract_proto_msgTypes[18]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1882,7 +2074,7 @@ func (x *RegisterAgentResponse) String() string {
 func (*RegisterAgentResponse) ProtoMessage() {}
 
 func (x *RegisterAgentResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_contract_v1_contract_proto_msgTypes[14]
+	mi := &file_contract_v1_contract_proto_msgTypes[18]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1895,7 +2087,7 @@ func (x *RegisterAgentResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RegisterAgentResponse.ProtoReflect.Descriptor instead.
 func (*RegisterAgentResponse) Descriptor() ([]byte, []int) {
-	return file_contract_v1_contract_proto_rawDescGZIP(), []int{14}
+	return file_contract_v1_contract_proto_rawDescGZIP(), []int{18}
 }
 
 func (x *RegisterAgentResponse) GetSuccess() bool {
@@ -1921,7 +2113,7 @@ type UnregisterAgentRequest struct {
 
 func (x *UnregisterAgentRequest) Reset() {
 	*x = UnregisterAgentRequest{}
-	mi := &file_contract_v1_contract_proto_msgTypes[15]
+	mi := &file_contract_v1_contract_proto_msgTypes[19]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1933,7 +2125,7 @@ func (x *UnregisterAgentRequest) String() string {
 func (*UnregisterAgentRequest) ProtoMessage() {}
 
 func (x *UnregisterAgentRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_contract_v1_contract_proto_msgTypes[15]
+	mi := &file_contract_v1_contract_proto_msgTypes[19]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1946,7 +2138,7 @@ func (x *UnregisterAgentRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UnregisterAgentRequest.ProtoReflect.Descriptor instead.
 func (*UnregisterAgentRequest) Descriptor() ([]byte, []int) {
-	return file_contract_v1_contract_proto_rawDescGZIP(), []int{15}
+	return file_contract_v1_contract_proto_rawDescGZIP(), []int{19}
 }
 
 func (x *UnregisterAgentRequest) GetAgentId() string {
@@ -1965,7 +2157,7 @@ type UnregisterAgentResponse struct {
 
 func (x *UnregisterAgentResponse) Reset() {
 	*x = UnregisterAgentResponse{}
-	mi := &file_contract_v1_contract_proto_msgTypes[16]
+	mi := &file_contract_v1_contract_proto_msgTypes[20]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1977,7 +2169,7 @@ func (x *UnregisterAgentResponse) String() string {
 func (*UnregisterAgentResponse) ProtoMessage() {}
 
 func (x *UnregisterAgentResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_contract_v1_contract_proto_msgTypes[16]
+	mi := &file_contract_v1_contract_proto_msgTypes[20]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1990,7 +2182,7 @@ func (x *UnregisterAgentResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UnregisterAgentResponse.ProtoReflect.Descriptor instead.
 func (*UnregisterAgentResponse) Descriptor() ([]byte, []int) {
-	return file_contract_v1_contract_proto_rawDescGZIP(), []int{16}
+	return file_contract_v1_contract_proto_rawDescGZIP(), []int{20}
 }
 
 func (x *UnregisterAgentResponse) GetSuccess() bool {
@@ -2009,7 +2201,7 @@ type GetAgentRequest struct {
 
 func (x *GetAgentRequest) Reset() {
 	*x = GetAgentRequest{}
-	mi := &file_contract_v1_contract_proto_msgTypes[17]
+	mi := &file_contract_v1_contract_proto_msgTypes[21]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2021,7 +2213,7 @@ func (x *GetAgentRequest) String() string {
 func (*GetAgentRequest) ProtoMessage() {}
 
 func (x *GetAgentRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_contract_v1_contract_proto_msgTypes[17]
+	mi := &file_contract_v1_contract_proto_msgTypes[21]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2034,7 +2226,7 @@ func (x *GetAgentRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetAgentRequest.ProtoReflect.Descriptor instead.
 func (*GetAgentRequest) Descriptor() ([]byte, []int) {
-	return file_contract_v1_contract_proto_rawDescGZIP(), []int{17}
+	return file_contract_v1_contract_proto_rawDescGZIP(), []int{21}
 }
 
 func (x *GetAgentRequest) GetAgentId() string {
@@ -2053,7 +2245,7 @@ type GetAgentResponse struct {
 
 func (x *GetAgentResponse) Reset() {
 	*x = GetAgentResponse{}
-	mi := &file_contract_v1_contract_proto_msgTypes[18]
+	mi := &file_contract_v1_contract_proto_msgTypes[22]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2065,7 +2257,7 @@ func (x *GetAgentResponse) String() string {
 func (*GetAgentResponse) ProtoMessage() {}
 
 func (x *GetAgentResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_contract_v1_contract_proto_msgTypes[18]
+	mi := &file_contract_v1_contract_proto_msgTypes[22]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2078,7 +2270,7 @@ func (x *GetAgentResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetAgentResponse.ProtoReflect.Descriptor instead.
 func (*GetAgentResponse) Descriptor() ([]byte, []int) {
-	return file_contract_v1_contract_proto_rawDescGZIP(), []int{18}
+	return file_contract_v1_contract_proto_rawDescGZIP(), []int{22}
 }
 
 func (x *GetAgentResponse) GetAgent() *AgentDescriptor {
@@ -2098,7 +2290,7 @@ type DiscoverAgentsRequest struct {
 
 func (x *DiscoverAgentsRequest) Reset() {
 	*x = DiscoverAgentsRequest{}
-	mi := &file_contract_v1_contract_proto_msgTypes[19]
+	mi := &file_contract_v1_contract_proto_msgTypes[23]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2110,7 +2302,7 @@ func (x *DiscoverAgentsRequest) String() string {
 func (*DiscoverAgentsRequest) ProtoMessage() {}
 
 func (x *DiscoverAgentsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_contract_v1_contract_proto_msgTypes[19]
+	mi := &file_contract_v1_contract_proto_msgTypes[23]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2123,7 +2315,7 @@ func (x *DiscoverAgentsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DiscoverAgentsRequest.ProtoReflect.Descriptor instead.
 func (*DiscoverAgentsRequest) Descriptor() ([]byte, []int) {
-	return file_contract_v1_contract_proto_rawDescGZIP(), []int{19}
+	return file_contract_v1_contract_proto_rawDescGZIP(), []int{23}
 }
 
 func (x *DiscoverAgentsRequest) GetRequiredCapabilities() []string {
@@ -2149,7 +2341,7 @@ type DiscoverAgentsResponse struct {
 
 func (x *DiscoverAgentsResponse) Reset() {
 	*x = DiscoverAgentsResponse{}
-	mi := &file_contract_v1_contract_proto_msgTypes[20]
+	mi := &file_contract_v1_contract_proto_msgTypes[24]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2161,7 +2353,7 @@ func (x *DiscoverAgentsResponse) String() string {
 func (*DiscoverAgentsResponse) ProtoMessage() {}
 
 func (x *DiscoverAgentsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_contract_v1_contract_proto_msgTypes[20]
+	mi := &file_contract_v1_contract_proto_msgTypes[24]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2174,7 +2366,7 @@ func (x *DiscoverAgentsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DiscoverAgentsResponse.ProtoReflect.Descriptor instead.
 func (*DiscoverAgentsResponse) Descriptor() ([]byte, []int) {
-	return file_contract_v1_contract_proto_rawDescGZIP(), []int{20}
+	return file_contract_v1_contract_proto_rawDescGZIP(), []int{24}
 }
 
 func (x *DiscoverAgentsResponse) GetAgents() []*AgentDescriptor {
@@ -2193,7 +2385,7 @@ type ReportHealthRequest struct {
 
 func (x *ReportHealthRequest) Reset() {
 	*x = ReportHealthRequest{}
-	mi := &file_contract_v1_contract_proto_msgTypes[21]
+	mi := &file_contract_v1_contract_proto_msgTypes[25]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2205,7 +2397,7 @@ func (x *ReportHealthRequest) String() string {
 func (*ReportHealthRequest) ProtoMessage() {}
 
 func (x *ReportHealthRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_contract_v1_contract_proto_msgTypes[21]
+	mi := &file_contract_v1_contract_proto_msgTypes[25]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2218,7 +2410,7 @@ func (x *ReportHealthRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ReportHealthRequest.ProtoReflect.Descriptor instead.
 func (*ReportHealthRequest) Descriptor() ([]byte, []int) {
-	return file_contract_v1_contract_proto_rawDescGZIP(), []int{21}
+	return file_contract_v1_contract_proto_rawDescGZIP(), []int{25}
 }
 
 func (x *ReportHealthRequest) GetHealth() *HealthStatus {
@@ -2237,7 +2429,7 @@ type ReportHealthResponse struct {
 
 func (x *ReportHealthResponse) Reset() {
 	*x = ReportHealthResponse{}
-	mi := &file_contract_v1_contract_proto_msgTypes[22]
+	mi := &file_contract_v1_contract_proto_msgTypes[26]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2249,7 +2441,7 @@ func (x *ReportHealthResponse) String() string {
 func (*ReportHealthResponse) ProtoMessage() {}
 
 func (x *ReportHealthResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_contract_v1_contract_proto_msgTypes[22]
+	mi := &file_contract_v1_contract_proto_msgTypes[26]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2262,7 +2454,7 @@ func (x *ReportHealthResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ReportHealthResponse.ProtoReflect.Descriptor instead.
 func (*ReportHealthResponse) Descriptor() ([]byte, []int) {
-	return file_contract_v1_contract_proto_rawDescGZIP(), []int{22}
+	return file_contract_v1_contract_proto_rawDescGZIP(), []int{26}
 }
 
 func (x *ReportHealthResponse) GetSuccess() bool {
@@ -2281,7 +2473,7 @@ type SubmitTaskRequest struct {
 
 func (x *SubmitTaskRequest) Reset() {
 	*x = SubmitTaskRequest{}
-	mi := &file_contract_v1_contract_proto_msgTypes[23]
+	mi := &file_contract_v1_contract_proto_msgTypes[27]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2293,7 +2485,7 @@ func (x *SubmitTaskRequest) String() string {
 func (*SubmitTaskRequest) ProtoMessage() {}
 
 func (x *SubmitTaskRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_contract_v1_contract_proto_msgTypes[23]
+	mi := &file_contract_v1_contract_proto_msgTypes[27]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2306,7 +2498,7 @@ func (x *SubmitTaskRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SubmitTaskRequest.ProtoReflect.Descriptor instead.
 func (*SubmitTaskRequest) Descriptor() ([]byte, []int) {
-	return file_contract_v1_contract_proto_rawDescGZIP(), []int{23}
+	return file_contract_v1_contract_proto_rawDescGZIP(), []int{27}
 }
 
 func (x *SubmitTaskRequest) GetTask() *Task {
@@ -2327,7 +2519,7 @@ type SubmitTaskResponse struct {
 
 func (x *SubmitTaskResponse) Reset() {
 	*x = SubmitTaskResponse{}
-	mi := &file_contract_v1_contract_proto_msgTypes[24]
+	mi := &file_contract_v1_contract_proto_msgTypes[28]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2339,7 +2531,7 @@ func (x *SubmitTaskResponse) String() string {
 func (*SubmitTaskResponse) ProtoMessage() {}
 
 func (x *SubmitTaskResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_contract_v1_contract_proto_msgTypes[24]
+	mi := &file_contract_v1_contract_proto_msgTypes[28]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2352,7 +2544,7 @@ func (x *SubmitTaskResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SubmitTaskResponse.ProtoReflect.Descriptor instead.
 func (*SubmitTaskResponse) Descriptor() ([]byte, []int) {
-	return file_contract_v1_contract_proto_rawDescGZIP(), []int{24}
+	return file_contract_v1_contract_proto_rawDescGZIP(), []int{28}
 }
 
 func (x *SubmitTaskResponse) GetResult() *TaskResult {
@@ -2387,7 +2579,7 @@ type ResultBinding struct {
 
 func (x *ResultBinding) Reset() {
 	*x = ResultBinding{}
-	mi := &file_contract_v1_contract_proto_msgTypes[25]
+	mi := &file_contract_v1_contract_proto_msgTypes[29]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2399,7 +2591,7 @@ func (x *ResultBinding) String() string {
 func (*ResultBinding) ProtoMessage() {}
 
 func (x *ResultBinding) ProtoReflect() protoreflect.Message {
-	mi := &file_contract_v1_contract_proto_msgTypes[25]
+	mi := &file_contract_v1_contract_proto_msgTypes[29]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2412,7 +2604,7 @@ func (x *ResultBinding) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ResultBinding.ProtoReflect.Descriptor instead.
 func (*ResultBinding) Descriptor() ([]byte, []int) {
-	return file_contract_v1_contract_proto_rawDescGZIP(), []int{25}
+	return file_contract_v1_contract_proto_rawDescGZIP(), []int{29}
 }
 
 func (x *ResultBinding) GetSourceStepId() string {
@@ -2448,7 +2640,7 @@ type WorkflowStep struct {
 
 func (x *WorkflowStep) Reset() {
 	*x = WorkflowStep{}
-	mi := &file_contract_v1_contract_proto_msgTypes[26]
+	mi := &file_contract_v1_contract_proto_msgTypes[30]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2460,7 +2652,7 @@ func (x *WorkflowStep) String() string {
 func (*WorkflowStep) ProtoMessage() {}
 
 func (x *WorkflowStep) ProtoReflect() protoreflect.Message {
-	mi := &file_contract_v1_contract_proto_msgTypes[26]
+	mi := &file_contract_v1_contract_proto_msgTypes[30]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2473,7 +2665,7 @@ func (x *WorkflowStep) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use WorkflowStep.ProtoReflect.Descriptor instead.
 func (*WorkflowStep) Descriptor() ([]byte, []int) {
-	return file_contract_v1_contract_proto_rawDescGZIP(), []int{26}
+	return file_contract_v1_contract_proto_rawDescGZIP(), []int{30}
 }
 
 func (x *WorkflowStep) GetStepId() string {
@@ -2515,7 +2707,7 @@ type WorkflowDefinition struct {
 
 func (x *WorkflowDefinition) Reset() {
 	*x = WorkflowDefinition{}
-	mi := &file_contract_v1_contract_proto_msgTypes[27]
+	mi := &file_contract_v1_contract_proto_msgTypes[31]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2527,7 +2719,7 @@ func (x *WorkflowDefinition) String() string {
 func (*WorkflowDefinition) ProtoMessage() {}
 
 func (x *WorkflowDefinition) ProtoReflect() protoreflect.Message {
-	mi := &file_contract_v1_contract_proto_msgTypes[27]
+	mi := &file_contract_v1_contract_proto_msgTypes[31]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2540,7 +2732,7 @@ func (x *WorkflowDefinition) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use WorkflowDefinition.ProtoReflect.Descriptor instead.
 func (*WorkflowDefinition) Descriptor() ([]byte, []int) {
-	return file_contract_v1_contract_proto_rawDescGZIP(), []int{27}
+	return file_contract_v1_contract_proto_rawDescGZIP(), []int{31}
 }
 
 func (x *WorkflowDefinition) GetWorkflowId() string {
@@ -2574,7 +2766,7 @@ type SubmitWorkflowRequest struct {
 
 func (x *SubmitWorkflowRequest) Reset() {
 	*x = SubmitWorkflowRequest{}
-	mi := &file_contract_v1_contract_proto_msgTypes[28]
+	mi := &file_contract_v1_contract_proto_msgTypes[32]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2586,7 +2778,7 @@ func (x *SubmitWorkflowRequest) String() string {
 func (*SubmitWorkflowRequest) ProtoMessage() {}
 
 func (x *SubmitWorkflowRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_contract_v1_contract_proto_msgTypes[28]
+	mi := &file_contract_v1_contract_proto_msgTypes[32]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2599,7 +2791,7 @@ func (x *SubmitWorkflowRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SubmitWorkflowRequest.ProtoReflect.Descriptor instead.
 func (*SubmitWorkflowRequest) Descriptor() ([]byte, []int) {
-	return file_contract_v1_contract_proto_rawDescGZIP(), []int{28}
+	return file_contract_v1_contract_proto_rawDescGZIP(), []int{32}
 }
 
 func (x *SubmitWorkflowRequest) GetRootTask() *Task {
@@ -2627,7 +2819,7 @@ type WorkflowStepResult struct {
 
 func (x *WorkflowStepResult) Reset() {
 	*x = WorkflowStepResult{}
-	mi := &file_contract_v1_contract_proto_msgTypes[29]
+	mi := &file_contract_v1_contract_proto_msgTypes[33]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2639,7 +2831,7 @@ func (x *WorkflowStepResult) String() string {
 func (*WorkflowStepResult) ProtoMessage() {}
 
 func (x *WorkflowStepResult) ProtoReflect() protoreflect.Message {
-	mi := &file_contract_v1_contract_proto_msgTypes[29]
+	mi := &file_contract_v1_contract_proto_msgTypes[33]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2652,7 +2844,7 @@ func (x *WorkflowStepResult) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use WorkflowStepResult.ProtoReflect.Descriptor instead.
 func (*WorkflowStepResult) Descriptor() ([]byte, []int) {
-	return file_contract_v1_contract_proto_rawDescGZIP(), []int{29}
+	return file_contract_v1_contract_proto_rawDescGZIP(), []int{33}
 }
 
 func (x *WorkflowStepResult) GetStepId() string {
@@ -2694,7 +2886,7 @@ type WorkflowResult struct {
 
 func (x *WorkflowResult) Reset() {
 	*x = WorkflowResult{}
-	mi := &file_contract_v1_contract_proto_msgTypes[30]
+	mi := &file_contract_v1_contract_proto_msgTypes[34]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2706,7 +2898,7 @@ func (x *WorkflowResult) String() string {
 func (*WorkflowResult) ProtoMessage() {}
 
 func (x *WorkflowResult) ProtoReflect() protoreflect.Message {
-	mi := &file_contract_v1_contract_proto_msgTypes[30]
+	mi := &file_contract_v1_contract_proto_msgTypes[34]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2719,7 +2911,7 @@ func (x *WorkflowResult) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use WorkflowResult.ProtoReflect.Descriptor instead.
 func (*WorkflowResult) Descriptor() ([]byte, []int) {
-	return file_contract_v1_contract_proto_rawDescGZIP(), []int{30}
+	return file_contract_v1_contract_proto_rawDescGZIP(), []int{34}
 }
 
 func (x *WorkflowResult) GetWorkflowId() string {
@@ -2802,7 +2994,7 @@ type SubmitWorkflowResponse struct {
 
 func (x *SubmitWorkflowResponse) Reset() {
 	*x = SubmitWorkflowResponse{}
-	mi := &file_contract_v1_contract_proto_msgTypes[31]
+	mi := &file_contract_v1_contract_proto_msgTypes[35]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2814,7 +3006,7 @@ func (x *SubmitWorkflowResponse) String() string {
 func (*SubmitWorkflowResponse) ProtoMessage() {}
 
 func (x *SubmitWorkflowResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_contract_v1_contract_proto_msgTypes[31]
+	mi := &file_contract_v1_contract_proto_msgTypes[35]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2827,7 +3019,7 @@ func (x *SubmitWorkflowResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SubmitWorkflowResponse.ProtoReflect.Descriptor instead.
 func (*SubmitWorkflowResponse) Descriptor() ([]byte, []int) {
-	return file_contract_v1_contract_proto_rawDescGZIP(), []int{31}
+	return file_contract_v1_contract_proto_rawDescGZIP(), []int{35}
 }
 
 func (x *SubmitWorkflowResponse) GetResult() *WorkflowResult {
@@ -2854,7 +3046,7 @@ type StartWorkflowRequest struct {
 
 func (x *StartWorkflowRequest) Reset() {
 	*x = StartWorkflowRequest{}
-	mi := &file_contract_v1_contract_proto_msgTypes[32]
+	mi := &file_contract_v1_contract_proto_msgTypes[36]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2866,7 +3058,7 @@ func (x *StartWorkflowRequest) String() string {
 func (*StartWorkflowRequest) ProtoMessage() {}
 
 func (x *StartWorkflowRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_contract_v1_contract_proto_msgTypes[32]
+	mi := &file_contract_v1_contract_proto_msgTypes[36]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2879,7 +3071,7 @@ func (x *StartWorkflowRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StartWorkflowRequest.ProtoReflect.Descriptor instead.
 func (*StartWorkflowRequest) Descriptor() ([]byte, []int) {
-	return file_contract_v1_contract_proto_rawDescGZIP(), []int{32}
+	return file_contract_v1_contract_proto_rawDescGZIP(), []int{36}
 }
 
 func (x *StartWorkflowRequest) GetRootTask() *Task {
@@ -2906,7 +3098,7 @@ type StartWorkflowResponse struct {
 
 func (x *StartWorkflowResponse) Reset() {
 	*x = StartWorkflowResponse{}
-	mi := &file_contract_v1_contract_proto_msgTypes[33]
+	mi := &file_contract_v1_contract_proto_msgTypes[37]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2918,7 +3110,7 @@ func (x *StartWorkflowResponse) String() string {
 func (*StartWorkflowResponse) ProtoMessage() {}
 
 func (x *StartWorkflowResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_contract_v1_contract_proto_msgTypes[33]
+	mi := &file_contract_v1_contract_proto_msgTypes[37]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2931,7 +3123,7 @@ func (x *StartWorkflowResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StartWorkflowResponse.ProtoReflect.Descriptor instead.
 func (*StartWorkflowResponse) Descriptor() ([]byte, []int) {
-	return file_contract_v1_contract_proto_rawDescGZIP(), []int{33}
+	return file_contract_v1_contract_proto_rawDescGZIP(), []int{37}
 }
 
 func (x *StartWorkflowResponse) GetRunId() string {
@@ -2957,7 +3149,7 @@ type GetWorkflowRequest struct {
 
 func (x *GetWorkflowRequest) Reset() {
 	*x = GetWorkflowRequest{}
-	mi := &file_contract_v1_contract_proto_msgTypes[34]
+	mi := &file_contract_v1_contract_proto_msgTypes[38]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2969,7 +3161,7 @@ func (x *GetWorkflowRequest) String() string {
 func (*GetWorkflowRequest) ProtoMessage() {}
 
 func (x *GetWorkflowRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_contract_v1_contract_proto_msgTypes[34]
+	mi := &file_contract_v1_contract_proto_msgTypes[38]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2982,7 +3174,7 @@ func (x *GetWorkflowRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetWorkflowRequest.ProtoReflect.Descriptor instead.
 func (*GetWorkflowRequest) Descriptor() ([]byte, []int) {
-	return file_contract_v1_contract_proto_rawDescGZIP(), []int{34}
+	return file_contract_v1_contract_proto_rawDescGZIP(), []int{38}
 }
 
 func (x *GetWorkflowRequest) GetRunId() string {
@@ -3002,7 +3194,7 @@ type GetWorkflowResponse struct {
 
 func (x *GetWorkflowResponse) Reset() {
 	*x = GetWorkflowResponse{}
-	mi := &file_contract_v1_contract_proto_msgTypes[35]
+	mi := &file_contract_v1_contract_proto_msgTypes[39]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3014,7 +3206,7 @@ func (x *GetWorkflowResponse) String() string {
 func (*GetWorkflowResponse) ProtoMessage() {}
 
 func (x *GetWorkflowResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_contract_v1_contract_proto_msgTypes[35]
+	mi := &file_contract_v1_contract_proto_msgTypes[39]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3027,7 +3219,7 @@ func (x *GetWorkflowResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetWorkflowResponse.ProtoReflect.Descriptor instead.
 func (*GetWorkflowResponse) Descriptor() ([]byte, []int) {
-	return file_contract_v1_contract_proto_rawDescGZIP(), []int{35}
+	return file_contract_v1_contract_proto_rawDescGZIP(), []int{39}
 }
 
 func (x *GetWorkflowResponse) GetResult() *WorkflowResult {
@@ -3053,7 +3245,7 @@ type CancelWorkflowRequest struct {
 
 func (x *CancelWorkflowRequest) Reset() {
 	*x = CancelWorkflowRequest{}
-	mi := &file_contract_v1_contract_proto_msgTypes[36]
+	mi := &file_contract_v1_contract_proto_msgTypes[40]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3065,7 +3257,7 @@ func (x *CancelWorkflowRequest) String() string {
 func (*CancelWorkflowRequest) ProtoMessage() {}
 
 func (x *CancelWorkflowRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_contract_v1_contract_proto_msgTypes[36]
+	mi := &file_contract_v1_contract_proto_msgTypes[40]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3078,7 +3270,7 @@ func (x *CancelWorkflowRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CancelWorkflowRequest.ProtoReflect.Descriptor instead.
 func (*CancelWorkflowRequest) Descriptor() ([]byte, []int) {
-	return file_contract_v1_contract_proto_rawDescGZIP(), []int{36}
+	return file_contract_v1_contract_proto_rawDescGZIP(), []int{40}
 }
 
 func (x *CancelWorkflowRequest) GetRunId() string {
@@ -3098,7 +3290,7 @@ type CancelWorkflowResponse struct {
 
 func (x *CancelWorkflowResponse) Reset() {
 	*x = CancelWorkflowResponse{}
-	mi := &file_contract_v1_contract_proto_msgTypes[37]
+	mi := &file_contract_v1_contract_proto_msgTypes[41]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3110,7 +3302,7 @@ func (x *CancelWorkflowResponse) String() string {
 func (*CancelWorkflowResponse) ProtoMessage() {}
 
 func (x *CancelWorkflowResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_contract_v1_contract_proto_msgTypes[37]
+	mi := &file_contract_v1_contract_proto_msgTypes[41]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3123,7 +3315,7 @@ func (x *CancelWorkflowResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CancelWorkflowResponse.ProtoReflect.Descriptor instead.
 func (*CancelWorkflowResponse) Descriptor() ([]byte, []int) {
-	return file_contract_v1_contract_proto_rawDescGZIP(), []int{37}
+	return file_contract_v1_contract_proto_rawDescGZIP(), []int{41}
 }
 
 func (x *CancelWorkflowResponse) GetResult() *WorkflowResult {
@@ -3149,7 +3341,7 @@ type ExecuteTaskRequest struct {
 
 func (x *ExecuteTaskRequest) Reset() {
 	*x = ExecuteTaskRequest{}
-	mi := &file_contract_v1_contract_proto_msgTypes[38]
+	mi := &file_contract_v1_contract_proto_msgTypes[42]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3161,7 +3353,7 @@ func (x *ExecuteTaskRequest) String() string {
 func (*ExecuteTaskRequest) ProtoMessage() {}
 
 func (x *ExecuteTaskRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_contract_v1_contract_proto_msgTypes[38]
+	mi := &file_contract_v1_contract_proto_msgTypes[42]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3174,7 +3366,7 @@ func (x *ExecuteTaskRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ExecuteTaskRequest.ProtoReflect.Descriptor instead.
 func (*ExecuteTaskRequest) Descriptor() ([]byte, []int) {
-	return file_contract_v1_contract_proto_rawDescGZIP(), []int{38}
+	return file_contract_v1_contract_proto_rawDescGZIP(), []int{42}
 }
 
 func (x *ExecuteTaskRequest) GetTask() *Task {
@@ -3193,7 +3385,7 @@ type ExecuteTaskResponse struct {
 
 func (x *ExecuteTaskResponse) Reset() {
 	*x = ExecuteTaskResponse{}
-	mi := &file_contract_v1_contract_proto_msgTypes[39]
+	mi := &file_contract_v1_contract_proto_msgTypes[43]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3205,7 +3397,7 @@ func (x *ExecuteTaskResponse) String() string {
 func (*ExecuteTaskResponse) ProtoMessage() {}
 
 func (x *ExecuteTaskResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_contract_v1_contract_proto_msgTypes[39]
+	mi := &file_contract_v1_contract_proto_msgTypes[43]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3218,7 +3410,7 @@ func (x *ExecuteTaskResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ExecuteTaskResponse.ProtoReflect.Descriptor instead.
 func (*ExecuteTaskResponse) Descriptor() ([]byte, []int) {
-	return file_contract_v1_contract_proto_rawDescGZIP(), []int{39}
+	return file_contract_v1_contract_proto_rawDescGZIP(), []int{43}
 }
 
 func (x *ExecuteTaskResponse) GetResult() *TaskResult {
@@ -3361,7 +3553,20 @@ const file_contract_v1_contract_proto_rawDesc = "" +
 	" \x01(\tR\areplyTo\x12\x15\n" +
 	"\x06ttl_ms\x18\v \x01(\x03R\x05ttlMs\x12\x17\n" +
 	"\atask_id\x18\f \x01(\tR\x06taskId\x123\n" +
-	"\bmetadata\x18\r \x01(\v2\x17.google.protobuf.StructR\bmetadata\"J\n" +
+	"\bmetadata\x18\r \x01(\v2\x17.google.protobuf.StructR\bmetadata\"u\n" +
+	"\n" +
+	"MessageAck\x12\x1d\n" +
+	"\n" +
+	"message_id\x18\x01 \x01(\tR\tmessageId\x12\x1a\n" +
+	"\baccepted\x18\x02 \x01(\bR\baccepted\x12,\n" +
+	"\x05error\x18\x03 \x01(\v2\x16.contract.v1.ErrorInfoR\x05error\"O\n" +
+	"\x15PublishMessageRequest\x126\n" +
+	"\amessage\x18\x01 \x01(\v2\x1c.contract.v1.MessageEnvelopeR\amessage\"C\n" +
+	"\x16PublishMessageResponse\x12)\n" +
+	"\x03ack\x18\x01 \x01(\v2\x17.contract.v1.MessageAckR\x03ack\"8\n" +
+	"\x15StreamMessagesRequest\x12\x1f\n" +
+	"\vreceiver_id\x18\x01 \x01(\tR\n" +
+	"receiverId\"J\n" +
 	"\x14RegisterAgentRequest\x122\n" +
 	"\x05agent\x18\x01 \x01(\v2\x1c.contract.v1.AgentDescriptorR\x05agent\"K\n" +
 	"\x15RegisterAgentResponse\x12\x18\n" +
@@ -3528,7 +3733,10 @@ const file_contract_v1_contract_proto_rawDesc = "" +
 	"\x1eWORKFLOW_STEP_STATUS_COMPLETED\x10\x04\x12\x1f\n" +
 	"\x1bWORKFLOW_STEP_STATUS_FAILED\x10\x05\x12 \n" +
 	"\x1cWORKFLOW_STEP_STATUS_SKIPPED\x10\x06\x12\"\n" +
-	"\x1eWORKFLOW_STEP_STATUS_CANCELLED\x10\a2\xc0\x03\n" +
+	"\x1eWORKFLOW_STEP_STATUS_CANCELLED\x10\a2\xc3\x01\n" +
+	"\x10MessagingService\x12Y\n" +
+	"\x0ePublishMessage\x12\".contract.v1.PublishMessageRequest\x1a#.contract.v1.PublishMessageResponse\x12T\n" +
+	"\x0eStreamMessages\x12\".contract.v1.StreamMessagesRequest\x1a\x1c.contract.v1.MessageEnvelope0\x012\xc0\x03\n" +
 	"\x0fRegistryService\x12V\n" +
 	"\rRegisterAgent\x12!.contract.v1.RegisterAgentRequest\x1a\".contract.v1.RegisterAgentResponse\x12\\\n" +
 	"\x0fUnregisterAgent\x12#.contract.v1.UnregisterAgentRequest\x1a$.contract.v1.UnregisterAgentResponse\x12G\n" +
@@ -3558,7 +3766,7 @@ func file_contract_v1_contract_proto_rawDescGZIP() []byte {
 }
 
 var file_contract_v1_contract_proto_enumTypes = make([]protoimpl.EnumInfo, 8)
-var file_contract_v1_contract_proto_msgTypes = make([]protoimpl.MessageInfo, 40)
+var file_contract_v1_contract_proto_msgTypes = make([]protoimpl.MessageInfo, 44)
 var file_contract_v1_contract_proto_goTypes = []any{
 	(ErrorCode)(0),                  // 0: contract.v1.ErrorCode
 	(AgentStatus)(0),                // 1: contract.v1.AgentStatus
@@ -3581,133 +3789,144 @@ var file_contract_v1_contract_proto_goTypes = []any{
 	(*TaskResult)(nil),              // 18: contract.v1.TaskResult
 	(*TaskEvent)(nil),               // 19: contract.v1.TaskEvent
 	(*MessageEnvelope)(nil),         // 20: contract.v1.MessageEnvelope
-	(*RegisterAgentRequest)(nil),    // 21: contract.v1.RegisterAgentRequest
-	(*RegisterAgentResponse)(nil),   // 22: contract.v1.RegisterAgentResponse
-	(*UnregisterAgentRequest)(nil),  // 23: contract.v1.UnregisterAgentRequest
-	(*UnregisterAgentResponse)(nil), // 24: contract.v1.UnregisterAgentResponse
-	(*GetAgentRequest)(nil),         // 25: contract.v1.GetAgentRequest
-	(*GetAgentResponse)(nil),        // 26: contract.v1.GetAgentResponse
-	(*DiscoverAgentsRequest)(nil),   // 27: contract.v1.DiscoverAgentsRequest
-	(*DiscoverAgentsResponse)(nil),  // 28: contract.v1.DiscoverAgentsResponse
-	(*ReportHealthRequest)(nil),     // 29: contract.v1.ReportHealthRequest
-	(*ReportHealthResponse)(nil),    // 30: contract.v1.ReportHealthResponse
-	(*SubmitTaskRequest)(nil),       // 31: contract.v1.SubmitTaskRequest
-	(*SubmitTaskResponse)(nil),      // 32: contract.v1.SubmitTaskResponse
-	(*ResultBinding)(nil),           // 33: contract.v1.ResultBinding
-	(*WorkflowStep)(nil),            // 34: contract.v1.WorkflowStep
-	(*WorkflowDefinition)(nil),      // 35: contract.v1.WorkflowDefinition
-	(*SubmitWorkflowRequest)(nil),   // 36: contract.v1.SubmitWorkflowRequest
-	(*WorkflowStepResult)(nil),      // 37: contract.v1.WorkflowStepResult
-	(*WorkflowResult)(nil),          // 38: contract.v1.WorkflowResult
-	(*SubmitWorkflowResponse)(nil),  // 39: contract.v1.SubmitWorkflowResponse
-	(*StartWorkflowRequest)(nil),    // 40: contract.v1.StartWorkflowRequest
-	(*StartWorkflowResponse)(nil),   // 41: contract.v1.StartWorkflowResponse
-	(*GetWorkflowRequest)(nil),      // 42: contract.v1.GetWorkflowRequest
-	(*GetWorkflowResponse)(nil),     // 43: contract.v1.GetWorkflowResponse
-	(*CancelWorkflowRequest)(nil),   // 44: contract.v1.CancelWorkflowRequest
-	(*CancelWorkflowResponse)(nil),  // 45: contract.v1.CancelWorkflowResponse
-	(*ExecuteTaskRequest)(nil),      // 46: contract.v1.ExecuteTaskRequest
-	(*ExecuteTaskResponse)(nil),     // 47: contract.v1.ExecuteTaskResponse
-	(*structpb.Struct)(nil),         // 48: google.protobuf.Struct
-	(*timestamppb.Timestamp)(nil),   // 49: google.protobuf.Timestamp
+	(*MessageAck)(nil),              // 21: contract.v1.MessageAck
+	(*PublishMessageRequest)(nil),   // 22: contract.v1.PublishMessageRequest
+	(*PublishMessageResponse)(nil),  // 23: contract.v1.PublishMessageResponse
+	(*StreamMessagesRequest)(nil),   // 24: contract.v1.StreamMessagesRequest
+	(*RegisterAgentRequest)(nil),    // 25: contract.v1.RegisterAgentRequest
+	(*RegisterAgentResponse)(nil),   // 26: contract.v1.RegisterAgentResponse
+	(*UnregisterAgentRequest)(nil),  // 27: contract.v1.UnregisterAgentRequest
+	(*UnregisterAgentResponse)(nil), // 28: contract.v1.UnregisterAgentResponse
+	(*GetAgentRequest)(nil),         // 29: contract.v1.GetAgentRequest
+	(*GetAgentResponse)(nil),        // 30: contract.v1.GetAgentResponse
+	(*DiscoverAgentsRequest)(nil),   // 31: contract.v1.DiscoverAgentsRequest
+	(*DiscoverAgentsResponse)(nil),  // 32: contract.v1.DiscoverAgentsResponse
+	(*ReportHealthRequest)(nil),     // 33: contract.v1.ReportHealthRequest
+	(*ReportHealthResponse)(nil),    // 34: contract.v1.ReportHealthResponse
+	(*SubmitTaskRequest)(nil),       // 35: contract.v1.SubmitTaskRequest
+	(*SubmitTaskResponse)(nil),      // 36: contract.v1.SubmitTaskResponse
+	(*ResultBinding)(nil),           // 37: contract.v1.ResultBinding
+	(*WorkflowStep)(nil),            // 38: contract.v1.WorkflowStep
+	(*WorkflowDefinition)(nil),      // 39: contract.v1.WorkflowDefinition
+	(*SubmitWorkflowRequest)(nil),   // 40: contract.v1.SubmitWorkflowRequest
+	(*WorkflowStepResult)(nil),      // 41: contract.v1.WorkflowStepResult
+	(*WorkflowResult)(nil),          // 42: contract.v1.WorkflowResult
+	(*SubmitWorkflowResponse)(nil),  // 43: contract.v1.SubmitWorkflowResponse
+	(*StartWorkflowRequest)(nil),    // 44: contract.v1.StartWorkflowRequest
+	(*StartWorkflowResponse)(nil),   // 45: contract.v1.StartWorkflowResponse
+	(*GetWorkflowRequest)(nil),      // 46: contract.v1.GetWorkflowRequest
+	(*GetWorkflowResponse)(nil),     // 47: contract.v1.GetWorkflowResponse
+	(*CancelWorkflowRequest)(nil),   // 48: contract.v1.CancelWorkflowRequest
+	(*CancelWorkflowResponse)(nil),  // 49: contract.v1.CancelWorkflowResponse
+	(*ExecuteTaskRequest)(nil),      // 50: contract.v1.ExecuteTaskRequest
+	(*ExecuteTaskResponse)(nil),     // 51: contract.v1.ExecuteTaskResponse
+	(*structpb.Struct)(nil),         // 52: google.protobuf.Struct
+	(*timestamppb.Timestamp)(nil),   // 53: google.protobuf.Timestamp
 }
 var file_contract_v1_contract_proto_depIdxs = []int32{
 	0,  // 0: contract.v1.ErrorInfo.code:type_name -> contract.v1.ErrorCode
-	48, // 1: contract.v1.Capability.metadata:type_name -> google.protobuf.Struct
+	52, // 1: contract.v1.Capability.metadata:type_name -> google.protobuf.Struct
 	10, // 2: contract.v1.AgentDescriptor.capabilities:type_name -> contract.v1.Capability
 	11, // 3: contract.v1.AgentDescriptor.endpoint:type_name -> contract.v1.AgentEndpoint
 	1,  // 4: contract.v1.AgentDescriptor.status:type_name -> contract.v1.AgentStatus
-	49, // 5: contract.v1.AgentDescriptor.created_at:type_name -> google.protobuf.Timestamp
-	49, // 6: contract.v1.AgentDescriptor.updated_at:type_name -> google.protobuf.Timestamp
-	48, // 7: contract.v1.AgentDescriptor.metadata:type_name -> google.protobuf.Struct
+	53, // 5: contract.v1.AgentDescriptor.created_at:type_name -> google.protobuf.Timestamp
+	53, // 6: contract.v1.AgentDescriptor.updated_at:type_name -> google.protobuf.Timestamp
+	52, // 7: contract.v1.AgentDescriptor.metadata:type_name -> google.protobuf.Struct
 	1,  // 8: contract.v1.HealthStatus.status:type_name -> contract.v1.AgentStatus
-	49, // 9: contract.v1.HealthStatus.timestamp:type_name -> google.protobuf.Timestamp
-	49, // 10: contract.v1.HealthStatus.last_heartbeat_at:type_name -> google.protobuf.Timestamp
-	48, // 11: contract.v1.Task.payload:type_name -> google.protobuf.Struct
+	53, // 9: contract.v1.HealthStatus.timestamp:type_name -> google.protobuf.Timestamp
+	53, // 10: contract.v1.HealthStatus.last_heartbeat_at:type_name -> google.protobuf.Timestamp
+	52, // 11: contract.v1.Task.payload:type_name -> google.protobuf.Struct
 	2,  // 12: contract.v1.Task.status:type_name -> contract.v1.TaskStatus
 	8,  // 13: contract.v1.Task.trace:type_name -> contract.v1.TraceContext
-	49, // 14: contract.v1.Task.created_at:type_name -> google.protobuf.Timestamp
+	53, // 14: contract.v1.Task.created_at:type_name -> google.protobuf.Timestamp
 	14, // 15: contract.v1.Task.retry_policy:type_name -> contract.v1.RetryPolicy
 	3,  // 16: contract.v1.Task.selection_policy:type_name -> contract.v1.SelectionPolicy
 	15, // 17: contract.v1.Task.bdi:type_name -> contract.v1.BdiExtension
 	16, // 18: contract.v1.Task.llm:type_name -> contract.v1.LlmExtension
-	48, // 19: contract.v1.Task.metadata:type_name -> google.protobuf.Struct
+	52, // 19: contract.v1.Task.metadata:type_name -> google.protobuf.Struct
 	2,  // 20: contract.v1.TaskResult.status:type_name -> contract.v1.TaskStatus
-	49, // 21: contract.v1.TaskResult.completed_at:type_name -> google.protobuf.Timestamp
+	53, // 21: contract.v1.TaskResult.completed_at:type_name -> google.protobuf.Timestamp
 	8,  // 22: contract.v1.TaskResult.trace:type_name -> contract.v1.TraceContext
-	48, // 23: contract.v1.TaskResult.output:type_name -> google.protobuf.Struct
+	52, // 23: contract.v1.TaskResult.output:type_name -> google.protobuf.Struct
 	9,  // 24: contract.v1.TaskResult.error:type_name -> contract.v1.ErrorInfo
-	49, // 25: contract.v1.TaskResult.started_at:type_name -> google.protobuf.Timestamp
-	48, // 26: contract.v1.TaskResult.metadata:type_name -> google.protobuf.Struct
+	53, // 25: contract.v1.TaskResult.started_at:type_name -> google.protobuf.Timestamp
+	52, // 26: contract.v1.TaskResult.metadata:type_name -> google.protobuf.Struct
 	4,  // 27: contract.v1.TaskEvent.type:type_name -> contract.v1.TaskEventType
-	49, // 28: contract.v1.TaskEvent.timestamp:type_name -> google.protobuf.Timestamp
+	53, // 28: contract.v1.TaskEvent.timestamp:type_name -> google.protobuf.Timestamp
 	8,  // 29: contract.v1.TaskEvent.trace:type_name -> contract.v1.TraceContext
 	5,  // 30: contract.v1.MessageEnvelope.type:type_name -> contract.v1.MessageType
-	48, // 31: contract.v1.MessageEnvelope.payload:type_name -> google.protobuf.Struct
-	49, // 32: contract.v1.MessageEnvelope.timestamp:type_name -> google.protobuf.Timestamp
+	52, // 31: contract.v1.MessageEnvelope.payload:type_name -> google.protobuf.Struct
+	53, // 32: contract.v1.MessageEnvelope.timestamp:type_name -> google.protobuf.Timestamp
 	8,  // 33: contract.v1.MessageEnvelope.trace:type_name -> contract.v1.TraceContext
-	48, // 34: contract.v1.MessageEnvelope.metadata:type_name -> google.protobuf.Struct
-	12, // 35: contract.v1.RegisterAgentRequest.agent:type_name -> contract.v1.AgentDescriptor
-	12, // 36: contract.v1.GetAgentResponse.agent:type_name -> contract.v1.AgentDescriptor
-	1,  // 37: contract.v1.DiscoverAgentsRequest.status_filter:type_name -> contract.v1.AgentStatus
-	12, // 38: contract.v1.DiscoverAgentsResponse.agents:type_name -> contract.v1.AgentDescriptor
-	13, // 39: contract.v1.ReportHealthRequest.health:type_name -> contract.v1.HealthStatus
-	17, // 40: contract.v1.SubmitTaskRequest.task:type_name -> contract.v1.Task
-	18, // 41: contract.v1.SubmitTaskResponse.result:type_name -> contract.v1.TaskResult
-	9,  // 42: contract.v1.SubmitTaskResponse.error:type_name -> contract.v1.ErrorInfo
-	38, // 43: contract.v1.SubmitTaskResponse.workflow_result:type_name -> contract.v1.WorkflowResult
-	17, // 44: contract.v1.WorkflowStep.task_template:type_name -> contract.v1.Task
-	33, // 45: contract.v1.WorkflowStep.input_bindings:type_name -> contract.v1.ResultBinding
-	34, // 46: contract.v1.WorkflowDefinition.steps:type_name -> contract.v1.WorkflowStep
-	17, // 47: contract.v1.SubmitWorkflowRequest.root_task:type_name -> contract.v1.Task
-	35, // 48: contract.v1.SubmitWorkflowRequest.workflow:type_name -> contract.v1.WorkflowDefinition
-	7,  // 49: contract.v1.WorkflowStepResult.status:type_name -> contract.v1.WorkflowStepStatus
-	18, // 50: contract.v1.WorkflowStepResult.result:type_name -> contract.v1.TaskResult
-	6,  // 51: contract.v1.WorkflowResult.status:type_name -> contract.v1.WorkflowStatus
-	37, // 52: contract.v1.WorkflowResult.step_results:type_name -> contract.v1.WorkflowStepResult
-	48, // 53: contract.v1.WorkflowResult.output:type_name -> google.protobuf.Struct
-	9,  // 54: contract.v1.WorkflowResult.error:type_name -> contract.v1.ErrorInfo
-	8,  // 55: contract.v1.WorkflowResult.trace:type_name -> contract.v1.TraceContext
-	49, // 56: contract.v1.WorkflowResult.created_at:type_name -> google.protobuf.Timestamp
-	49, // 57: contract.v1.WorkflowResult.completed_at:type_name -> google.protobuf.Timestamp
-	38, // 58: contract.v1.SubmitWorkflowResponse.result:type_name -> contract.v1.WorkflowResult
-	9,  // 59: contract.v1.SubmitWorkflowResponse.error:type_name -> contract.v1.ErrorInfo
-	17, // 60: contract.v1.StartWorkflowRequest.root_task:type_name -> contract.v1.Task
-	35, // 61: contract.v1.StartWorkflowRequest.workflow:type_name -> contract.v1.WorkflowDefinition
-	9,  // 62: contract.v1.StartWorkflowResponse.error:type_name -> contract.v1.ErrorInfo
-	38, // 63: contract.v1.GetWorkflowResponse.result:type_name -> contract.v1.WorkflowResult
-	9,  // 64: contract.v1.GetWorkflowResponse.error:type_name -> contract.v1.ErrorInfo
-	38, // 65: contract.v1.CancelWorkflowResponse.result:type_name -> contract.v1.WorkflowResult
-	9,  // 66: contract.v1.CancelWorkflowResponse.error:type_name -> contract.v1.ErrorInfo
-	17, // 67: contract.v1.ExecuteTaskRequest.task:type_name -> contract.v1.Task
-	18, // 68: contract.v1.ExecuteTaskResponse.result:type_name -> contract.v1.TaskResult
-	21, // 69: contract.v1.RegistryService.RegisterAgent:input_type -> contract.v1.RegisterAgentRequest
-	23, // 70: contract.v1.RegistryService.UnregisterAgent:input_type -> contract.v1.UnregisterAgentRequest
-	25, // 71: contract.v1.RegistryService.GetAgent:input_type -> contract.v1.GetAgentRequest
-	27, // 72: contract.v1.RegistryService.DiscoverAgents:input_type -> contract.v1.DiscoverAgentsRequest
-	29, // 73: contract.v1.RegistryService.ReportHealth:input_type -> contract.v1.ReportHealthRequest
-	31, // 74: contract.v1.OrchestratorService.SubmitTask:input_type -> contract.v1.SubmitTaskRequest
-	36, // 75: contract.v1.OrchestratorService.SubmitWorkflow:input_type -> contract.v1.SubmitWorkflowRequest
-	40, // 76: contract.v1.OrchestratorService.StartWorkflow:input_type -> contract.v1.StartWorkflowRequest
-	42, // 77: contract.v1.OrchestratorService.GetWorkflow:input_type -> contract.v1.GetWorkflowRequest
-	44, // 78: contract.v1.OrchestratorService.CancelWorkflow:input_type -> contract.v1.CancelWorkflowRequest
-	46, // 79: contract.v1.AgentService.ExecuteTask:input_type -> contract.v1.ExecuteTaskRequest
-	22, // 80: contract.v1.RegistryService.RegisterAgent:output_type -> contract.v1.RegisterAgentResponse
-	24, // 81: contract.v1.RegistryService.UnregisterAgent:output_type -> contract.v1.UnregisterAgentResponse
-	26, // 82: contract.v1.RegistryService.GetAgent:output_type -> contract.v1.GetAgentResponse
-	28, // 83: contract.v1.RegistryService.DiscoverAgents:output_type -> contract.v1.DiscoverAgentsResponse
-	30, // 84: contract.v1.RegistryService.ReportHealth:output_type -> contract.v1.ReportHealthResponse
-	32, // 85: contract.v1.OrchestratorService.SubmitTask:output_type -> contract.v1.SubmitTaskResponse
-	39, // 86: contract.v1.OrchestratorService.SubmitWorkflow:output_type -> contract.v1.SubmitWorkflowResponse
-	41, // 87: contract.v1.OrchestratorService.StartWorkflow:output_type -> contract.v1.StartWorkflowResponse
-	43, // 88: contract.v1.OrchestratorService.GetWorkflow:output_type -> contract.v1.GetWorkflowResponse
-	45, // 89: contract.v1.OrchestratorService.CancelWorkflow:output_type -> contract.v1.CancelWorkflowResponse
-	47, // 90: contract.v1.AgentService.ExecuteTask:output_type -> contract.v1.ExecuteTaskResponse
-	80, // [80:91] is the sub-list for method output_type
-	69, // [69:80] is the sub-list for method input_type
-	69, // [69:69] is the sub-list for extension type_name
-	69, // [69:69] is the sub-list for extension extendee
-	0,  // [0:69] is the sub-list for field type_name
+	52, // 34: contract.v1.MessageEnvelope.metadata:type_name -> google.protobuf.Struct
+	9,  // 35: contract.v1.MessageAck.error:type_name -> contract.v1.ErrorInfo
+	20, // 36: contract.v1.PublishMessageRequest.message:type_name -> contract.v1.MessageEnvelope
+	21, // 37: contract.v1.PublishMessageResponse.ack:type_name -> contract.v1.MessageAck
+	12, // 38: contract.v1.RegisterAgentRequest.agent:type_name -> contract.v1.AgentDescriptor
+	12, // 39: contract.v1.GetAgentResponse.agent:type_name -> contract.v1.AgentDescriptor
+	1,  // 40: contract.v1.DiscoverAgentsRequest.status_filter:type_name -> contract.v1.AgentStatus
+	12, // 41: contract.v1.DiscoverAgentsResponse.agents:type_name -> contract.v1.AgentDescriptor
+	13, // 42: contract.v1.ReportHealthRequest.health:type_name -> contract.v1.HealthStatus
+	17, // 43: contract.v1.SubmitTaskRequest.task:type_name -> contract.v1.Task
+	18, // 44: contract.v1.SubmitTaskResponse.result:type_name -> contract.v1.TaskResult
+	9,  // 45: contract.v1.SubmitTaskResponse.error:type_name -> contract.v1.ErrorInfo
+	42, // 46: contract.v1.SubmitTaskResponse.workflow_result:type_name -> contract.v1.WorkflowResult
+	17, // 47: contract.v1.WorkflowStep.task_template:type_name -> contract.v1.Task
+	37, // 48: contract.v1.WorkflowStep.input_bindings:type_name -> contract.v1.ResultBinding
+	38, // 49: contract.v1.WorkflowDefinition.steps:type_name -> contract.v1.WorkflowStep
+	17, // 50: contract.v1.SubmitWorkflowRequest.root_task:type_name -> contract.v1.Task
+	39, // 51: contract.v1.SubmitWorkflowRequest.workflow:type_name -> contract.v1.WorkflowDefinition
+	7,  // 52: contract.v1.WorkflowStepResult.status:type_name -> contract.v1.WorkflowStepStatus
+	18, // 53: contract.v1.WorkflowStepResult.result:type_name -> contract.v1.TaskResult
+	6,  // 54: contract.v1.WorkflowResult.status:type_name -> contract.v1.WorkflowStatus
+	41, // 55: contract.v1.WorkflowResult.step_results:type_name -> contract.v1.WorkflowStepResult
+	52, // 56: contract.v1.WorkflowResult.output:type_name -> google.protobuf.Struct
+	9,  // 57: contract.v1.WorkflowResult.error:type_name -> contract.v1.ErrorInfo
+	8,  // 58: contract.v1.WorkflowResult.trace:type_name -> contract.v1.TraceContext
+	53, // 59: contract.v1.WorkflowResult.created_at:type_name -> google.protobuf.Timestamp
+	53, // 60: contract.v1.WorkflowResult.completed_at:type_name -> google.protobuf.Timestamp
+	42, // 61: contract.v1.SubmitWorkflowResponse.result:type_name -> contract.v1.WorkflowResult
+	9,  // 62: contract.v1.SubmitWorkflowResponse.error:type_name -> contract.v1.ErrorInfo
+	17, // 63: contract.v1.StartWorkflowRequest.root_task:type_name -> contract.v1.Task
+	39, // 64: contract.v1.StartWorkflowRequest.workflow:type_name -> contract.v1.WorkflowDefinition
+	9,  // 65: contract.v1.StartWorkflowResponse.error:type_name -> contract.v1.ErrorInfo
+	42, // 66: contract.v1.GetWorkflowResponse.result:type_name -> contract.v1.WorkflowResult
+	9,  // 67: contract.v1.GetWorkflowResponse.error:type_name -> contract.v1.ErrorInfo
+	42, // 68: contract.v1.CancelWorkflowResponse.result:type_name -> contract.v1.WorkflowResult
+	9,  // 69: contract.v1.CancelWorkflowResponse.error:type_name -> contract.v1.ErrorInfo
+	17, // 70: contract.v1.ExecuteTaskRequest.task:type_name -> contract.v1.Task
+	18, // 71: contract.v1.ExecuteTaskResponse.result:type_name -> contract.v1.TaskResult
+	22, // 72: contract.v1.MessagingService.PublishMessage:input_type -> contract.v1.PublishMessageRequest
+	24, // 73: contract.v1.MessagingService.StreamMessages:input_type -> contract.v1.StreamMessagesRequest
+	25, // 74: contract.v1.RegistryService.RegisterAgent:input_type -> contract.v1.RegisterAgentRequest
+	27, // 75: contract.v1.RegistryService.UnregisterAgent:input_type -> contract.v1.UnregisterAgentRequest
+	29, // 76: contract.v1.RegistryService.GetAgent:input_type -> contract.v1.GetAgentRequest
+	31, // 77: contract.v1.RegistryService.DiscoverAgents:input_type -> contract.v1.DiscoverAgentsRequest
+	33, // 78: contract.v1.RegistryService.ReportHealth:input_type -> contract.v1.ReportHealthRequest
+	35, // 79: contract.v1.OrchestratorService.SubmitTask:input_type -> contract.v1.SubmitTaskRequest
+	40, // 80: contract.v1.OrchestratorService.SubmitWorkflow:input_type -> contract.v1.SubmitWorkflowRequest
+	44, // 81: contract.v1.OrchestratorService.StartWorkflow:input_type -> contract.v1.StartWorkflowRequest
+	46, // 82: contract.v1.OrchestratorService.GetWorkflow:input_type -> contract.v1.GetWorkflowRequest
+	48, // 83: contract.v1.OrchestratorService.CancelWorkflow:input_type -> contract.v1.CancelWorkflowRequest
+	50, // 84: contract.v1.AgentService.ExecuteTask:input_type -> contract.v1.ExecuteTaskRequest
+	23, // 85: contract.v1.MessagingService.PublishMessage:output_type -> contract.v1.PublishMessageResponse
+	20, // 86: contract.v1.MessagingService.StreamMessages:output_type -> contract.v1.MessageEnvelope
+	26, // 87: contract.v1.RegistryService.RegisterAgent:output_type -> contract.v1.RegisterAgentResponse
+	28, // 88: contract.v1.RegistryService.UnregisterAgent:output_type -> contract.v1.UnregisterAgentResponse
+	30, // 89: contract.v1.RegistryService.GetAgent:output_type -> contract.v1.GetAgentResponse
+	32, // 90: contract.v1.RegistryService.DiscoverAgents:output_type -> contract.v1.DiscoverAgentsResponse
+	34, // 91: contract.v1.RegistryService.ReportHealth:output_type -> contract.v1.ReportHealthResponse
+	36, // 92: contract.v1.OrchestratorService.SubmitTask:output_type -> contract.v1.SubmitTaskResponse
+	43, // 93: contract.v1.OrchestratorService.SubmitWorkflow:output_type -> contract.v1.SubmitWorkflowResponse
+	45, // 94: contract.v1.OrchestratorService.StartWorkflow:output_type -> contract.v1.StartWorkflowResponse
+	47, // 95: contract.v1.OrchestratorService.GetWorkflow:output_type -> contract.v1.GetWorkflowResponse
+	49, // 96: contract.v1.OrchestratorService.CancelWorkflow:output_type -> contract.v1.CancelWorkflowResponse
+	51, // 97: contract.v1.AgentService.ExecuteTask:output_type -> contract.v1.ExecuteTaskResponse
+	85, // [85:98] is the sub-list for method output_type
+	72, // [72:85] is the sub-list for method input_type
+	72, // [72:72] is the sub-list for extension type_name
+	72, // [72:72] is the sub-list for extension extendee
+	0,  // [0:72] is the sub-list for field type_name
 }
 
 func init() { file_contract_v1_contract_proto_init() }
@@ -3721,9 +3940,9 @@ func file_contract_v1_contract_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_contract_v1_contract_proto_rawDesc), len(file_contract_v1_contract_proto_rawDesc)),
 			NumEnums:      8,
-			NumMessages:   40,
+			NumMessages:   44,
 			NumExtensions: 0,
-			NumServices:   3,
+			NumServices:   4,
 		},
 		GoTypes:           file_contract_v1_contract_proto_goTypes,
 		DependencyIndexes: file_contract_v1_contract_proto_depIdxs,

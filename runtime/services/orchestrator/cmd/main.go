@@ -9,7 +9,7 @@ import (
 	"google.golang.org/grpc"
 
 	pb "tg/runtime/gen/go/contract/v1"
-	"tg/runtime/services/orchestrator/internal/events"
+	"tg/runtime/services/internal/events"
 	"tg/runtime/services/orchestrator/internal/server"
 )
 

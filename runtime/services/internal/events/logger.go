@@ -8,7 +8,6 @@ import (
 	"time"
 )
 
-// Event é a estrutura gravada em cada linha do JSONL.
 type Event struct {
 	EventID    string `json:"event_id"`
 	TaskID     string `json:"task_id,omitempty"`
@@ -23,7 +22,6 @@ type Event struct {
 	Details    string `json:"details,omitempty"`
 }
 
-// Logger grava eventos em um arquivo JSONL com append thread-safe.
 type Logger struct {
 	mu   sync.Mutex
 	file *os.File
@@ -33,35 +31,33 @@ func NewLogger(path string) (*Logger, error) {
 	if err := os.MkdirAll(filepath(path), 0755); err != nil {
 		return nil, err
 	}
-	f, err := os.OpenFile(path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	file, err := os.OpenFile(path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		return nil, err
 	}
-	return &Logger{file: f}, nil
+	return &Logger{file: file}, nil
 }
 
-func (l *Logger) Log(e Event) {
-	e.Timestamp = time.Now().UTC().Format(time.RFC3339Nano)
+func (l *Logger) Log(event Event) {
+	event.Timestamp = time.Now().UTC().Format(time.RFC3339Nano)
 	l.mu.Lock()
 	defer l.mu.Unlock()
-
-	line, err := json.Marshal(e)
+	line, err := json.Marshal(event)
 	if err != nil {
 		slog.Error("failed to marshal event", "err", err)
 		return
 	}
-	l.file.Write(append(line, '\n'))
+	if _, err := l.file.Write(append(line, '\n')); err != nil {
+		slog.Error("failed to write event", "err", err)
+	}
 }
 
-func (l *Logger) Close() {
-	l.file.Close()
-}
+func (l *Logger) Close() { _ = l.file.Close() }
 
-// filepath retorna o diretório de um caminho de arquivo.
 func filepath(path string) string {
-	for i := len(path) - 1; i >= 0; i-- {
-		if path[i] == '/' {
-			return path[:i]
+	for index := len(path) - 1; index >= 0; index-- {
+		if path[index] == '/' {
+			return path[:index]
 		}
 	}
 	return "."
