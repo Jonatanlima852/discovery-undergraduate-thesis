@@ -45,5 +45,43 @@ services:
     depends_on:
       - registry
 
+  llm-agent:
+    profiles:
+      - llm
+      - heterogeneous
+    build:
+      context: ..
+      dockerfile: agents/llm-agent/Dockerfile
+    ports:
+      - "60056:60056"
+    environment:
+      AGENT_ID: "llm-agent-01"
+      AGENT_HOST: "llm-agent"
+      AGENT_PORT: "60056"
+      REGISTRY_ADDR: "registry:50051"
+      HEARTBEAT_INTERVAL_SECONDS: "5"
+      LLM_MODEL: "${LLM_MODEL:-gpt-5.6-luna}"
+      OPENAI_API_KEY: "${OPENAI_API_KEY:-}"
+    depends_on:
+      - registry
+
+  bdi-agent:
+    profiles:
+      - heterogeneous
+    build:
+      context: ..
+      dockerfile: agents/bdi-agent/Dockerfile
+    ports:
+      - "60054:60054"
+    environment:
+      AGENT_ID: "bdi-agent-01"
+      AGENT_HOST: "bdi-agent"
+      AGENT_PORT: "60054"
+      REGISTRY_ADDR: "registry:50051"
+      CAPABILITY: "route-planning"
+      HEARTBEAT_INTERVAL_SECONDS: "5"
+    depends_on:
+      - registry
+
 volumes:
   events_data:

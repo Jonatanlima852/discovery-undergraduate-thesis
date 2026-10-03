@@ -1,9 +1,11 @@
 import argparse
+import json
 import os
 import sys
 import uuid
 
 import grpc
+from google.protobuf import json_format
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../../sdk/python/src"))
 
@@ -103,6 +105,24 @@ def main():
     print(f"  concluido: {result.completed_at.ToDatetime()}")
     if result.HasField("error") and result.error.message:
         print(f"  erro     : {result.error.message}")
+    if result.HasField("output") and result.output.fields:
+        print("  output   :")
+        print(
+            json.dumps(
+                json_format.MessageToDict(result.output),
+                ensure_ascii=False,
+                indent=2,
+            )
+        )
+    if result.HasField("metadata") and result.metadata.fields:
+        print("  metadata :")
+        print(
+            json.dumps(
+                json_format.MessageToDict(result.metadata),
+                ensure_ascii=False,
+                indent=2,
+            )
+        )
 
 
 if __name__ == "__main__":

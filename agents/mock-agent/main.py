@@ -3,15 +3,13 @@ import os
 import random
 import sys
 import time
-import uuid
-from concurrent import futures
 
-import grpc
 from google.protobuf import timestamp_pb2
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../../sdk/python/src"))
 
-from contract.v1 import contract_pb2, contract_pb2_grpc
+from contract.v1 import contract_pb2
+from tg_sdk import Agent
 
 logging.basicConfig(
     level=logging.INFO,
@@ -26,35 +24,13 @@ def _now():
     return ts
 
 
-def _build_descriptor(agent_id, capability, host, port):
-    return contract_pb2.AgentDescriptor(
-        agent_id=agent_id,
-        name=f"Mock Agent ({agent_id})",
-        runtime="python-mock",
-        contract_version="0.1.0",
-        capabilities=[
-            contract_pb2.Capability(
-                capability_id=capability,
-                name=capability,
-                description=f"Mock capability: {capability}",
-            )
-        ],
-        endpoint=contract_pb2.AgentEndpoint(
-            protocol="grpc",
-            address=f"{host}:{port}",
-        ),
-        status=contract_pb2.AGENT_STATUS_ALIVE,
-    )
-
-
-class MockAgentServicer(contract_pb2_grpc.AgentServiceServicer):
-    def __init__(self, agent_id, delay_ms, fail_rate):
-        self.agent_id = agent_id
+class MockAgent(Agent):
+    def __init__(self, delay_ms, fail_rate, **kwargs):
+        super().__init__(**kwargs)
         self.delay_ms = delay_ms
         self.fail_rate = fail_rate
 
-    def ExecuteTask(self, request, context):
-        task = request.task
+    def execute_task(self, task):
         log.info("task received task_id=%s goal=%s", task.task_id, task.goal)
 
         time.sleep(self.delay_ms / 1000)
@@ -83,20 +59,7 @@ class MockAgentServicer(contract_pb2_grpc.AgentServiceServicer):
                 trace=task.trace,
             )
 
-        return contract_pb2.ExecuteTaskResponse(result=result)
-
-
-def register(registry_addr, descriptor):
-    channel = grpc.insecure_channel(registry_addr)
-    stub = contract_pb2_grpc.RegistryServiceStub(channel)
-    resp = stub.RegisterAgent(
-        contract_pb2.RegisterAgentRequest(agent=descriptor)
-    )
-    if resp.success:
-        log.info("registered with registry addr=%s", registry_addr)
-    else:
-        log.error("registration failed: %s", resp.message)
-        sys.exit(1)
+        return result
 
 
 def main():
@@ -108,17 +71,18 @@ def main():
     delay_ms = int(os.getenv("DELAY_MS", "100"))
     fail_rate = float(os.getenv("FAIL_RATE", "0.0"))
 
-    descriptor = _build_descriptor(agent_id, capability, host, port)
-    register(registry_addr, descriptor)
-
-    server = grpc.server(futures.ThreadPoolExecutor(max_workers=4))
-    contract_pb2_grpc.add_AgentServiceServicer_to_server(
-        MockAgentServicer(agent_id, delay_ms, fail_rate), server
+    agent = MockAgent(
+        agent_id=agent_id,
+        name=f"Mock Agent ({agent_id})",
+        capabilities=[capability],
+        host=host,
+        port=port,
+        registry_addr=registry_addr,
+        runtime="python-mock",
+        delay_ms=delay_ms,
+        fail_rate=fail_rate,
     )
-    server.add_insecure_port(f"[::]:{port}")
-    server.start()
-    log.info("agent service started agent_id=%s port=%d", agent_id, port)
-    server.wait_for_termination()
+    agent.run()
 
 
 if __name__ == "__main__":
