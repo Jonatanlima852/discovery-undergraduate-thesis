@@ -286,6 +286,65 @@ class Scenario:
         task_type="WORKFLOW",
         payload=None,
     ):
+        request = self._workflow_request(
+            goal, steps=steps, final_step_id=final_step_id,
+            workflow_id=workflow_id, task_type=task_type, payload=payload,
+        )
+        root_task_id = request.root_task.task_id
+        self._event("WORKFLOW_SUBMITTED", "workflow", task_id=root_task_id)
+        response = self._stub.SubmitWorkflow(request)
+        if response.HasField("error") and response.error.message:
+            self._event(
+                "WORKFLOW_REJECTED", "workflow", task_id=root_task_id,
+                error=response.error.message,
+            )
+            raise RuntimeError(f"workflow: {response.error.message}")
+        result = ScenarioWorkflowResult(response.result)
+        self._event(
+            "WORKFLOW_FINISHED", "workflow", task_id=root_task_id,
+            run_id=result.run_id, status=result.status,
+        )
+        return result
+
+    def start_workflow(
+        self, goal, *, steps, final_step_id, workflow_id=None,
+        task_type="WORKFLOW", payload=None,
+    ):
+        request = self._workflow_request(
+            goal, steps=steps, final_step_id=final_step_id,
+            workflow_id=workflow_id, task_type=task_type, payload=payload,
+        )
+        response = self._stub.StartWorkflow(contract_pb2.StartWorkflowRequest(
+            root_task=request.root_task, workflow=request.workflow,
+        ))
+        if response.HasField("error") and response.error.message:
+            raise RuntimeError(f"workflow: {response.error.message}")
+        self._event(
+            "WORKFLOW_STARTED", "workflow",
+            task_id=request.root_task.task_id, run_id=response.run_id,
+        )
+        return response.run_id
+
+    def get_workflow(self, run_id):
+        response = self._stub.GetWorkflow(
+            contract_pb2.GetWorkflowRequest(run_id=run_id)
+        )
+        if response.HasField("error") and response.error.message:
+            raise RuntimeError(f"workflow: {response.error.message}")
+        return ScenarioWorkflowResult(response.result)
+
+    def cancel_workflow(self, run_id):
+        response = self._stub.CancelWorkflow(
+            contract_pb2.CancelWorkflowRequest(run_id=run_id)
+        )
+        if response.HasField("error") and response.error.message:
+            raise RuntimeError(f"workflow: {response.error.message}")
+        return ScenarioWorkflowResult(response.result)
+
+    def _workflow_request(
+        self, goal, *, steps, final_step_id, workflow_id=None,
+        task_type="WORKFLOW", payload=None,
+    ):
         root_task_id = str(uuid.uuid4())
         root = contract_pb2.Task(
             task_id=root_task_id,
@@ -332,27 +391,14 @@ class Scenario:
                 input_bindings=bindings,
             ))
 
-        self._event("WORKFLOW_SUBMITTED", "workflow", task_id=root_task_id)
-        response = self._stub.SubmitWorkflow(contract_pb2.SubmitWorkflowRequest(
+        return contract_pb2.SubmitWorkflowRequest(
             root_task=root,
             workflow=contract_pb2.WorkflowDefinition(
                 workflow_id=workflow_id or str(uuid.uuid4()),
                 steps=workflow_steps,
                 final_step_id=final_step_id,
             ),
-        ))
-        if response.HasField("error") and response.error.message:
-            self._event(
-                "WORKFLOW_REJECTED", "workflow", task_id=root_task_id,
-                error=response.error.message,
-            )
-            raise RuntimeError(f"workflow: {response.error.message}")
-        result = ScenarioWorkflowResult(response.result)
-        self._event(
-            "WORKFLOW_FINISHED", "workflow", task_id=root_task_id,
-            run_id=result.run_id, status=result.status,
         )
-        return result
 
     def report(self):
         return ScenarioReport(

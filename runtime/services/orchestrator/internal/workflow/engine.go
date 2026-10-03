@@ -57,6 +57,10 @@ type stepExecution struct {
 }
 
 func (e *Engine) Execute(parent context.Context, root *pb.Task, definition *pb.WorkflowDefinition) (*pb.WorkflowResult, *pb.ErrorInfo) {
+	return e.execute(parent, root, definition, "", nil)
+}
+
+func (e *Engine) execute(parent context.Context, root *pb.Task, definition *pb.WorkflowDefinition, requestedRunID string, created func()) (*pb.WorkflowResult, *pb.ErrorInfo) {
 	if root == nil {
 		return nil, workflowError(pb.ErrorCode_ERROR_CODE_INVALID_TASK, "root_task is required", false)
 	}
@@ -70,13 +74,23 @@ func (e *Engine) Execute(parent context.Context, root *pb.Task, definition *pb.W
 	if workflowID == "" {
 		workflowID = uuid.NewString()
 	}
-	result := &pb.WorkflowResult{WorkflowId: workflowID, RunId: uuid.NewString(), RootTaskId: root.TaskId, Status: pb.WorkflowStatus_WORKFLOW_STATUS_CREATED, Trace: proto.Clone(root.Trace).(*pb.TraceContext), CreatedAt: timestamppb.Now()}
+	runID := requestedRunID
+	if runID == "" {
+		runID = uuid.NewString()
+	}
+	result := &pb.WorkflowResult{WorkflowId: workflowID, RunId: runID, RootTaskId: root.TaskId, Status: pb.WorkflowStatus_WORKFLOW_STATUS_CREATED, Trace: proto.Clone(root.Trace).(*pb.TraceContext), CreatedAt: timestamppb.Now()}
 	if err := e.store.Create(result); err != nil {
 		return nil, workflowError(pb.ErrorCode_ERROR_CODE_EXECUTION_FAILED, err.Error(), true)
+	}
+	if created != nil {
+		created()
 	}
 	e.log(result, root.TaskId, "WORKFLOW_CREATED", "", "", 0)
 	e.log(result, root.TaskId, "WORKFLOW_VALIDATED", "", "", 0)
 	result.Status = pb.WorkflowStatus_WORKFLOW_STATUS_RUNNING
+	if err := e.store.MarkRunning(result.RunId); err != nil {
+		return nil, workflowError(pb.ErrorCode_ERROR_CODE_EXECUTION_FAILED, err.Error(), true)
+	}
 	e.log(result, root.TaskId, "WORKFLOW_STARTED", "", "", 0)
 
 	statuses := make(map[string]pb.WorkflowStepStatus, len(definition.Steps))
@@ -176,8 +190,13 @@ func (e *Engine) Execute(parent context.Context, root *pb.Task, definition *pb.W
 				_ = e.store.SaveStep(result.RunId, cancelled)
 			}
 		}
-		result.Status = pb.WorkflowStatus_WORKFLOW_STATUS_TIMEOUT
-		result.Error = workflowError(pb.ErrorCode_ERROR_CODE_TIMEOUT, "workflow execution timed out", false)
+		if parent.Err() == context.Canceled {
+			result.Status = pb.WorkflowStatus_WORKFLOW_STATUS_CANCELLED
+			result.Error = workflowError(pb.ErrorCode_ERROR_CODE_EXECUTION_FAILED, "workflow execution cancelled", false)
+		} else {
+			result.Status = pb.WorkflowStatus_WORKFLOW_STATUS_TIMEOUT
+			result.Error = workflowError(pb.ErrorCode_ERROR_CODE_TIMEOUT, "workflow execution timed out", false)
+		}
 	} else if failed := firstFailed(definition, stepResults); failed != nil {
 		result.Status = pb.WorkflowStatus_WORKFLOW_STATUS_FAILED
 		if failed.Result != nil {
@@ -203,6 +222,9 @@ func (e *Engine) Execute(parent context.Context, root *pb.Task, definition *pb.W
 	}
 	if result.Status == pb.WorkflowStatus_WORKFLOW_STATUS_TIMEOUT {
 		eventType = "WORKFLOW_TIMEOUT"
+	}
+	if result.Status == pb.WorkflowStatus_WORKFLOW_STATUS_CANCELLED {
+		eventType = "WORKFLOW_CANCELLED"
 	}
 	e.log(result, root.TaskId, eventType, definition.FinalStepId, "", 0)
 	return result, nil

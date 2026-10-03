@@ -412,9 +412,34 @@ message SubmitWorkflowResponse {
   ErrorInfo error        = 2;
 }
 
+message StartWorkflowRequest {
+  Task root_task               = 1;
+  WorkflowDefinition workflow = 2;
+}
+
+message StartWorkflowResponse {
+  string run_id   = 1;
+  ErrorInfo error = 2;
+}
+
+message GetWorkflowRequest { string run_id = 1; }
+message GetWorkflowResponse {
+  WorkflowResult result = 1;
+  ErrorInfo error        = 2;
+}
+
+message CancelWorkflowRequest { string run_id = 1; }
+message CancelWorkflowResponse {
+  WorkflowResult result = 1;
+  ErrorInfo error        = 2;
+}
+
 service OrchestratorService {
   rpc SubmitTask (SubmitTaskRequest) returns (SubmitTaskResponse);
   rpc SubmitWorkflow (SubmitWorkflowRequest) returns (SubmitWorkflowResponse);
+  rpc StartWorkflow (StartWorkflowRequest) returns (StartWorkflowResponse);
+  rpc GetWorkflow (GetWorkflowRequest) returns (GetWorkflowResponse);
+  rpc CancelWorkflow (CancelWorkflowRequest) returns (CancelWorkflowResponse);
 }
 
 // ─────────────────────────────────────────────

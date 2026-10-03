@@ -275,6 +275,9 @@ var RegistryService_ServiceDesc = grpc.ServiceDesc{
 const (
 	OrchestratorService_SubmitTask_FullMethodName     = "/contract.v1.OrchestratorService/SubmitTask"
 	OrchestratorService_SubmitWorkflow_FullMethodName = "/contract.v1.OrchestratorService/SubmitWorkflow"
+	OrchestratorService_StartWorkflow_FullMethodName  = "/contract.v1.OrchestratorService/StartWorkflow"
+	OrchestratorService_GetWorkflow_FullMethodName    = "/contract.v1.OrchestratorService/GetWorkflow"
+	OrchestratorService_CancelWorkflow_FullMethodName = "/contract.v1.OrchestratorService/CancelWorkflow"
 )
 
 // OrchestratorServiceClient is the client API for OrchestratorService service.
@@ -283,6 +286,9 @@ const (
 type OrchestratorServiceClient interface {
 	SubmitTask(ctx context.Context, in *SubmitTaskRequest, opts ...grpc.CallOption) (*SubmitTaskResponse, error)
 	SubmitWorkflow(ctx context.Context, in *SubmitWorkflowRequest, opts ...grpc.CallOption) (*SubmitWorkflowResponse, error)
+	StartWorkflow(ctx context.Context, in *StartWorkflowRequest, opts ...grpc.CallOption) (*StartWorkflowResponse, error)
+	GetWorkflow(ctx context.Context, in *GetWorkflowRequest, opts ...grpc.CallOption) (*GetWorkflowResponse, error)
+	CancelWorkflow(ctx context.Context, in *CancelWorkflowRequest, opts ...grpc.CallOption) (*CancelWorkflowResponse, error)
 }
 
 type orchestratorServiceClient struct {
@@ -313,12 +319,45 @@ func (c *orchestratorServiceClient) SubmitWorkflow(ctx context.Context, in *Subm
 	return out, nil
 }
 
+func (c *orchestratorServiceClient) StartWorkflow(ctx context.Context, in *StartWorkflowRequest, opts ...grpc.CallOption) (*StartWorkflowResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(StartWorkflowResponse)
+	err := c.cc.Invoke(ctx, OrchestratorService_StartWorkflow_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *orchestratorServiceClient) GetWorkflow(ctx context.Context, in *GetWorkflowRequest, opts ...grpc.CallOption) (*GetWorkflowResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetWorkflowResponse)
+	err := c.cc.Invoke(ctx, OrchestratorService_GetWorkflow_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *orchestratorServiceClient) CancelWorkflow(ctx context.Context, in *CancelWorkflowRequest, opts ...grpc.CallOption) (*CancelWorkflowResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CancelWorkflowResponse)
+	err := c.cc.Invoke(ctx, OrchestratorService_CancelWorkflow_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // OrchestratorServiceServer is the server API for OrchestratorService service.
 // All implementations must embed UnimplementedOrchestratorServiceServer
 // for forward compatibility.
 type OrchestratorServiceServer interface {
 	SubmitTask(context.Context, *SubmitTaskRequest) (*SubmitTaskResponse, error)
 	SubmitWorkflow(context.Context, *SubmitWorkflowRequest) (*SubmitWorkflowResponse, error)
+	StartWorkflow(context.Context, *StartWorkflowRequest) (*StartWorkflowResponse, error)
+	GetWorkflow(context.Context, *GetWorkflowRequest) (*GetWorkflowResponse, error)
+	CancelWorkflow(context.Context, *CancelWorkflowRequest) (*CancelWorkflowResponse, error)
 	mustEmbedUnimplementedOrchestratorServiceServer()
 }
 
@@ -334,6 +373,15 @@ func (UnimplementedOrchestratorServiceServer) SubmitTask(context.Context, *Submi
 }
 func (UnimplementedOrchestratorServiceServer) SubmitWorkflow(context.Context, *SubmitWorkflowRequest) (*SubmitWorkflowResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method SubmitWorkflow not implemented")
+}
+func (UnimplementedOrchestratorServiceServer) StartWorkflow(context.Context, *StartWorkflowRequest) (*StartWorkflowResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method StartWorkflow not implemented")
+}
+func (UnimplementedOrchestratorServiceServer) GetWorkflow(context.Context, *GetWorkflowRequest) (*GetWorkflowResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetWorkflow not implemented")
+}
+func (UnimplementedOrchestratorServiceServer) CancelWorkflow(context.Context, *CancelWorkflowRequest) (*CancelWorkflowResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method CancelWorkflow not implemented")
 }
 func (UnimplementedOrchestratorServiceServer) mustEmbedUnimplementedOrchestratorServiceServer() {}
 func (UnimplementedOrchestratorServiceServer) testEmbeddedByValue()                             {}
@@ -392,6 +440,60 @@ func _OrchestratorService_SubmitWorkflow_Handler(srv interface{}, ctx context.Co
 	return interceptor(ctx, in, info, handler)
 }
 
+func _OrchestratorService_StartWorkflow_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(StartWorkflowRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OrchestratorServiceServer).StartWorkflow(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: OrchestratorService_StartWorkflow_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OrchestratorServiceServer).StartWorkflow(ctx, req.(*StartWorkflowRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _OrchestratorService_GetWorkflow_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetWorkflowRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OrchestratorServiceServer).GetWorkflow(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: OrchestratorService_GetWorkflow_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OrchestratorServiceServer).GetWorkflow(ctx, req.(*GetWorkflowRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _OrchestratorService_CancelWorkflow_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CancelWorkflowRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OrchestratorServiceServer).CancelWorkflow(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: OrchestratorService_CancelWorkflow_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OrchestratorServiceServer).CancelWorkflow(ctx, req.(*CancelWorkflowRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // OrchestratorService_ServiceDesc is the grpc.ServiceDesc for OrchestratorService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -406,6 +508,18 @@ var OrchestratorService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "SubmitWorkflow",
 			Handler:    _OrchestratorService_SubmitWorkflow_Handler,
+		},
+		{
+			MethodName: "StartWorkflow",
+			Handler:    _OrchestratorService_StartWorkflow_Handler,
+		},
+		{
+			MethodName: "GetWorkflow",
+			Handler:    _OrchestratorService_GetWorkflow_Handler,
+		},
+		{
+			MethodName: "CancelWorkflow",
+			Handler:    _OrchestratorService_CancelWorkflow_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

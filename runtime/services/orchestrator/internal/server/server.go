@@ -22,6 +22,7 @@ type OrchestratorServer struct {
 	executor *execution.Executor
 	workflow *workflow.Engine
 	planner  *planning.Planner
+	async    *workflow.AsyncRunner
 }
 
 func New(registryAddr string, logger *events.Logger, timeout ...time.Duration) *OrchestratorServer {
@@ -43,7 +44,44 @@ func New(registryAddr string, logger *events.Logger, timeout ...time.Duration) *
 		executor: taskExecutor,
 		workflow: engine,
 		planner:  planning.New(taskExecutor, validator),
+		async:    workflow.NewAsyncRunner(engine, store),
 	}
+}
+
+func (srv *OrchestratorServer) StartWorkflow(_ context.Context, req *pb.StartWorkflowRequest) (*pb.StartWorkflowResponse, error) {
+	if req == nil || req.RootTask == nil {
+		return nil, status.Error(codes.InvalidArgument, "root_task is required")
+	}
+	if req.Workflow == nil {
+		return nil, status.Error(codes.InvalidArgument, "workflow is required")
+	}
+	runID, failure := srv.async.Start(req.RootTask, req.Workflow)
+	if failure != nil {
+		return &pb.StartWorkflowResponse{Error: failure}, nil
+	}
+	return &pb.StartWorkflowResponse{RunId: runID}, nil
+}
+
+func (srv *OrchestratorServer) GetWorkflow(_ context.Context, req *pb.GetWorkflowRequest) (*pb.GetWorkflowResponse, error) {
+	if req == nil || req.RunId == "" {
+		return nil, status.Error(codes.InvalidArgument, "run_id is required")
+	}
+	result, failure := srv.async.Get(req.RunId)
+	if failure != nil {
+		return &pb.GetWorkflowResponse{Error: failure}, nil
+	}
+	return &pb.GetWorkflowResponse{Result: result}, nil
+}
+
+func (srv *OrchestratorServer) CancelWorkflow(_ context.Context, req *pb.CancelWorkflowRequest) (*pb.CancelWorkflowResponse, error) {
+	if req == nil || req.RunId == "" {
+		return nil, status.Error(codes.InvalidArgument, "run_id is required")
+	}
+	result, failure := srv.async.Cancel(req.RunId)
+	if failure != nil {
+		return &pb.CancelWorkflowResponse{Result: result, Error: failure}, nil
+	}
+	return &pb.CancelWorkflowResponse{Result: result}, nil
 }
 
 func (srv *OrchestratorServer) SubmitTask(ctx context.Context, req *pb.SubmitTaskRequest) (*pb.SubmitTaskResponse, error) {

@@ -12,8 +12,20 @@ import (
 type Store interface {
 	Create(*pb.WorkflowResult) error
 	Get(runID string) (*pb.WorkflowResult, error)
+	MarkRunning(runID string) error
 	SaveStep(runID string, step *pb.WorkflowStepResult) error
 	Complete(runID string, result *pb.WorkflowResult) error
+}
+
+func (s *InMemoryStore) MarkRunning(runID string) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	result, exists := s.runs[runID]
+	if !exists {
+		return fmt.Errorf("workflow run not found: %s", runID)
+	}
+	result.Status = pb.WorkflowStatus_WORKFLOW_STATUS_RUNNING
+	return nil
 }
 
 type InMemoryStore struct {

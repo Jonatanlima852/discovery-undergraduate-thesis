@@ -656,7 +656,7 @@ Atualizado em 2026-10-03.
 12E.3 Workflow síncrono explícito      CONCLUÍDA
 12E.4 Dependências e paralelismo       CONCLUÍDA
 12E.5 Planejamento automático          CONCLUÍDA
-12E.6 API assíncrona e persistência    PENDENTE
+12E.6 API assíncrona e persistência    CONCLUÍDA
 12E.7 Migrar cenário heterogêneo       PENDENTE
 ```
 
@@ -699,6 +699,17 @@ compatível `workflow_result`, preservando `result` para tasks simples. O agente
 LLM passou a produzir o DAG completo, incluindo dependências, bindings e a
 extensão BDI necessária.
 
+A 12E.6 adicionou `StartWorkflow`, `GetWorkflow` e `CancelWorkflow` ao contrato
+e ao SDK Python. O `AsyncRunner` usa um contexto independente da chamada gRPC,
+mantém os canceladores ativos de forma concorrente e aguarda o estado terminal
+ao cancelar. O `WorkflowStore` registra criação, `RUNNING`, resultados por step
+e conclusão, permitindo acompanhamento por polling de snapshots defensivos.
+O store em memória permanece a implementação padrão; SQLite foi avaliado como
+uma troca futura da interface, não necessária para os experimentos locais e
+evitada agora para não introduzir uma dependência operacional antes dos
+benchmarks. Os testes com race detector cobrem início, consulta, conclusão,
+cancelamento e rejeição antes de iniciar.
+
 Validação integrada realizada em 2026-10-03: o cenário isolado
 `scenarios/workflow-sequential` executou `first -> second`, ambos pelo agente
 `workflow-echo`, e retornou a saída do segundo step. Os eventos correlacionaram
@@ -706,8 +717,9 @@ workflow, run, step, task e trace, e o ambiente Docker foi removido após a
 verificação. Testes adicionais cobrem endpoint, store defensivo, ordem
 topológica, agregação, falha e propagação de `SKIPPED`.
 
-Próximo incremento: 12E.6, expondo início, consulta e cancelamento assíncronos
-sobre o store de workflows, sem remover o endpoint síncrono existente.
+Próximo incremento: 12E.7, reduzindo o cenário heterogêneo a uma única pergunta
+e validando o fluxo real planner LLM -> agente BDI -> explicação LLM, com
+métricas e correlação por workflow e step.
 
 ### 12E.1 — Extrair `TaskExecutor`
 

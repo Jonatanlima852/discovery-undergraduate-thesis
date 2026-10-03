@@ -61,8 +61,25 @@ class FakeWorkflowOrchestrator:
             )
         )
 
+    def StartWorkflow(self, request):
+        self.request = request
+        return contract_pb2.StartWorkflowResponse(run_id="run-async")
+
+    def GetWorkflow(self, request):
+        return contract_pb2.GetWorkflowResponse(result=contract_pb2.WorkflowResult(
+            workflow_id="async", run_id=request.run_id,
+            status=contract_pb2.WORKFLOW_STATUS_RUNNING,
+        ))
+
+    def CancelWorkflow(self, request):
+        return contract_pb2.CancelWorkflowResponse(result=contract_pb2.WorkflowResult(
+            workflow_id="async", run_id=request.run_id,
+            status=contract_pb2.WORKFLOW_STATUS_CANCELLED,
+        ))
+
 
 class ScenarioTests(unittest.TestCase):
+
     def test_run_submits_declared_entry_and_returns_report(self):
         stub = FakeOrchestrator([
             response(
@@ -176,6 +193,23 @@ class ScenarioTests(unittest.TestCase):
         self.assertEqual(result.steps["finish"]["result"].agent_id, "agent-final")
         self.assertEqual(stub.request.workflow.steps[1].depends_on, ["start"])
         self.assertEqual(stub.request.root_task.trace.trace_id, scenario.trace_id)
+
+    def test_async_workflow_start_get_and_cancel(self):
+        stub = FakeWorkflowOrchestrator()
+        scenario = Scenario("async", orchestrator_stub=stub)
+        declaration = [{
+            "step_id": "only", "goal": "work", "capabilities": ["echo"],
+        }]
+
+        run_id = scenario.start_workflow(
+            "work", steps=declaration, final_step_id="only",
+        )
+        running = scenario.get_workflow(run_id)
+        cancelled = scenario.cancel_workflow(run_id)
+
+        self.assertEqual(run_id, "run-async")
+        self.assertEqual(running.status, "WORKFLOW_STATUS_RUNNING")
+        self.assertEqual(cancelled.status, "WORKFLOW_STATUS_CANCELLED")
 
 
 if __name__ == "__main__":
