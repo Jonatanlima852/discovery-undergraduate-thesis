@@ -1,6 +1,6 @@
 import unittest
 
-from compute_metrics import summarize_task
+from compute_metrics import summarize_task, WORKFLOW_COMPLETED
 
 
 class RecoveryMetricsTests(unittest.TestCase):
@@ -18,6 +18,17 @@ class RecoveryMetricsTests(unittest.TestCase):
         self.assertEqual(row["recovery_ms"], 15)
         self.assertEqual(row["reassignment_count"], 1)
         self.assertEqual(row["status"], "TASK_COMPLETED")
+
+    def test_summarizes_workflow_root_as_completed(self):
+        events = [
+            {"task_id": "root", "trace_id": "trace", "type": "TASK_CREATED", "timestamp": "2026-10-03T12:00:00+00:00"},
+            {"task_id": "root", "workflow_id": "workflow", "run_id": "run", "type": WORKFLOW_COMPLETED, "timestamp": "2026-10-03T12:00:01+00:00"},
+        ]
+
+        row = summarize_task("root", events)
+
+        self.assertEqual(row["status"], WORKFLOW_COMPLETED)
+        self.assertEqual(row["total_latency_ms"], 1000)
 
 
 if __name__ == "__main__":

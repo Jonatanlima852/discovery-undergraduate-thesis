@@ -70,6 +70,7 @@ def main():
     capability = os.getenv("CAPABILITY", "echo")
     delay_ms = int(os.getenv("DELAY_MS", "100"))
     fail_rate = float(os.getenv("FAIL_RATE", "0.0"))
+    reported_load = os.getenv("REPORTED_LOAD")
 
     agent = MockAgent(
         agent_id=agent_id,
@@ -81,6 +82,9 @@ def main():
         runtime="python-mock",
         delay_ms=delay_ms,
         fail_rate=fail_rate,
+        reported_load=(
+            float(reported_load) if reported_load is not None else None
+        ),
     )
     agent.run()
 

@@ -36,7 +36,7 @@ class Agent:
 
     def __init__(self, agent_id, name, capabilities, host, port, registry_addr,
                  runtime="python-sdk", contract_version="0.1.0",
-                 heartbeat_interval_seconds=None):
+                 heartbeat_interval_seconds=None, reported_load=None):
         self.agent_id = agent_id
         self.name = name
         self.capabilities = capabilities
@@ -52,6 +52,7 @@ class Agent:
         if heartbeat_interval_seconds <= 0:
             raise ValueError("heartbeat_interval_seconds deve ser maior que zero")
         self.heartbeat_interval_seconds = heartbeat_interval_seconds
+        self.reported_load = reported_load
         self._current_task_count = 0
         self._task_count_lock = threading.Lock()
         self._heartbeat_stop = threading.Event()
@@ -209,7 +210,11 @@ class Agent:
                     timestamp=now,
                     last_heartbeat_at=now,
                     current_task_count=task_count,
-                    load=1.0 if task_count else 0.0,
+                    load=(
+                        float(self.reported_load)
+                        if self.reported_load is not None
+                        else (1.0 if task_count else 0.0)
+                    ),
                 )
             )
         )

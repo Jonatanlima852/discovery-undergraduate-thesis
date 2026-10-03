@@ -65,6 +65,18 @@ make test
 uv run --directory sdk/python --with pytest pytest -q
 ```
 
+## Benchmarks A-E
+
+Com `OPENAI_API_KEY` configurada no `.env`, execute:
+
+```sh
+./benchmarks/run.sh
+```
+
+O comando sobe uma topologia isolada, executa os cinco cenários, salva eventos,
+CSVs, JSON e gráfico em uma pasta datada dentro de `benchmarks/results/`, e
+remove os contêineres ao terminar.
+
 Para validar apenas os arquivos Docker Compose:
 
 ```sh

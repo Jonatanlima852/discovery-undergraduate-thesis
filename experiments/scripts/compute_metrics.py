@@ -9,6 +9,10 @@ COMPLETED = "TASK_COMPLETED"
 FAILED = "TASK_FAILED"
 TIMEOUT = "TASK_TIMEOUT"
 REASSIGNED = "TASK_REASSIGNED"
+WORKFLOW_COMPLETED = "WORKFLOW_COMPLETED"
+WORKFLOW_FAILED = "WORKFLOW_FAILED"
+WORKFLOW_TIMEOUT = "WORKFLOW_TIMEOUT"
+WORKFLOW_CANCELLED = "WORKFLOW_CANCELLED"
 
 
 def parse_args():
@@ -52,7 +56,11 @@ def summarize_task(task_id, events):
 
     created = by_type.get(CREATED)
     assigned = by_type.get(ASSIGNED)
-    finished = by_type.get(COMPLETED) or by_type.get(FAILED)
+    finished = (
+        by_type.get(COMPLETED) or by_type.get(FAILED)
+        or by_type.get(WORKFLOW_COMPLETED) or by_type.get(WORKFLOW_FAILED)
+        or by_type.get(WORKFLOW_TIMEOUT) or by_type.get(WORKFLOW_CANCELLED)
+    )
 
     if created is None:
         return None
@@ -110,7 +118,10 @@ def percentile(values, p):
 
 def print_aggregate(rows):
     total = len(rows)
-    completed = [row for row in rows if row["status"] == COMPLETED]
+    completed = [
+        row for row in rows
+        if row["status"] in (COMPLETED, WORKFLOW_COMPLETED)
+    ]
     latencies = [row["total_latency_ms"] for row in completed if row["total_latency_ms"] is not None]
 
     print(f"tasks totais:      {total}")

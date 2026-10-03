@@ -320,21 +320,29 @@ Suggested event format:
 
 ```text
 benchmarks/
-  scenarios/
-    scenario_a_basic.py
-    scenario_b_policies.py
-    scenario_c_heterogeneous.py
-    scenario_d_failure.py
-    scenario_e_llm_assisted.py
+  compose.yaml
+  run.py
+  run.sh
   results/
-    run-001/
+    README.md
+    <timestamp>/
       events.jsonl
       results.json
       summary.csv
-  analysis/
-    analyze_results.py
-    plot_results.py
+      task-summary.csv
+      latency.svg
+      agent-distribution.svg
+      recovery.svg
+      message-count.svg
 ```
+
+## Implementação
+
+Os cenários A-E estão automatizados por `benchmarks/run.sh`, com topologia em
+`benchmarks/compose.yaml`. Cada execução cria uma pasta datada contendo os
+eventos, resultados, dois sumários CSV e um gráfico SVG. A execução de
+referência e sua interpretação estão documentadas em
+`docs/implementation/phase-13-benchmarks.md`.
 
 ## Minimum final charts
 

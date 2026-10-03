@@ -47,6 +47,7 @@ def main():
     port = int(os.getenv("AGENT_PORT", "60052"))
     registry_addr = os.getenv("REGISTRY_ADDR", "localhost:50051")
     capability = os.getenv("CAPABILITY", "echo")
+    reported_load = os.getenv("REPORTED_LOAD")
 
     agent = EchoAgent(
         agent_id=agent_id,
@@ -56,6 +57,9 @@ def main():
         port=port,
         registry_addr=registry_addr,
         runtime="python-sdk-echo",
+        reported_load=(
+            float(reported_load) if reported_load is not None else None
+        ),
     )
     agent.run()
 
