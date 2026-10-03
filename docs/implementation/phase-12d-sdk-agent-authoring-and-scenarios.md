@@ -250,7 +250,7 @@ Atualizado em 2026-10-03.
 12D.1 Modelos Python amigáveis       CONCLUÍDA
 12D.2 BdiAgent declarativo           CONCLUÍDA
 12D.3 LlmAgent declarativo           CONCLUÍDA
-12D.4 Runtime de cenário             PARCIAL
+12D.4 Runtime de cenário             CONCLUÍDA
 12D.5 Deployment por cenário         PENDENTE
 ```
 
@@ -275,10 +275,16 @@ estruturada e rejeita campos operacionais como IDs, trace, status, tentativa e
 políticas, inclusive dentro de subtasks. Os testes continuam usando cliente
 OpenAI falso e não fazem chamadas externas.
 
-Próximo incremento: concluir a 12D.4, ampliando `Scenario`/`ScenarioResult`
-com execução de uma entrada, assertions de agentes e tipos, relatório
-correlacionado e persistência de resultados, mantendo explícito o adaptador
-transitório até a fase 12E.
+A 12D.4 adicionou `Scenario.run()`/`ask()`, injeção de stub para testes,
+`ScenarioReport`, assertions de conclusão e participação por agente/tipo,
+eventos locais correlacionados pelo mesmo trace e exportação JSON. O cenário
+heterogêneo persiste o relatório com seus resultados e eventos. `submit()`
+permanece identificado como adaptador transitório; ele será substituído pela
+execução de workflow no runtime durante a fase 12E.
+
+Próximo incremento: concluir a 12D.5 criando uma topologia isolada para o
+cenário heterogêneo, healthchecks/readiness, documentação de portas/secrets e
+limpeza por Compose project.
 
 ### 12D.1 — Modelos Python amigáveis
 

@@ -88,7 +88,19 @@ def main():
         assert route.metadata["selected_plan"] == "via_intermediate"
         assert route.output["route"] == ["A", "B", "D"]
         assert route.output["distance"] == 25
-        print(f"\nCENÁRIO APROVADO trace_id={scenario.trace_id}")
+        report = scenario.report()
+        report.assert_completed()
+        report.assert_agent_kind_used("llm").assert_agent_kind_used("bdi")
+        default_report_path = os.path.abspath(os.path.join(
+            os.path.dirname(__file__),
+            "../../experiments/results/heterogeneous-report.json",
+        ))
+        report_path = os.getenv("SCENARIO_REPORT_PATH", default_report_path)
+        report.save(report_path)
+        print(
+            f"\nCENÁRIO APROVADO trace_id={scenario.trace_id} "
+            f"report={report_path}"
+        )
 
 
 if __name__ == "__main__":
