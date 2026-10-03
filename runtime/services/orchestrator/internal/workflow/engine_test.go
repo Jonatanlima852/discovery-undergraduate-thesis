@@ -2,7 +2,9 @@ package workflow
 
 import (
 	"context"
+	"sync"
 	"testing"
+	"time"
 
 	"google.golang.org/protobuf/types/known/structpb"
 
@@ -11,12 +13,15 @@ import (
 )
 
 type engineExecutor struct {
+	mu     sync.Mutex
 	calls  []*pb.Task
 	failAt string
 }
 
 func (e *engineExecutor) Execute(_ context.Context, task *pb.Task) (*pb.TaskResult, *pb.ErrorInfo) {
+	e.mu.Lock()
 	e.calls = append(e.calls, task)
+	e.mu.Unlock()
 	if task.Goal == e.failAt {
 		failure := &pb.ErrorInfo{Code: pb.ErrorCode_ERROR_CODE_EXECUTION_FAILED, Message: "step failed"}
 		return &pb.TaskResult{
@@ -102,13 +107,116 @@ func TestEngineStopsOnFailureAndSkipsDependents(t *testing.T) {
 	}
 }
 
-func TestEngineRejectsBindingsUntilPhase12E4(t *testing.T) {
+type bindingExecutor struct{ received *pb.Task }
+
+func (e *bindingExecutor) Execute(_ context.Context, task *pb.Task) (*pb.TaskResult, *pb.ErrorInfo) {
+	if task.Goal == "plan" {
+		output, _ := structpb.NewStruct(map[string]any{"route": map[string]any{"next": "BDI"}})
+		metadata, _ := structpb.NewStruct(map[string]any{"confidence": 0.9})
+		return &pb.TaskResult{TaskId: task.TaskId, AgentId: "planner", Status: pb.TaskStatus_TASK_STATUS_COMPLETED, Output: output, Metadata: metadata}, nil
+	}
+	e.received = task
+	output, _ := structpb.NewStruct(map[string]any{"ok": true})
+	return &pb.TaskResult{TaskId: task.TaskId, AgentId: "worker", Status: pb.TaskStatus_TASK_STATUS_COMPLETED, Output: output}, nil
+}
+
+func TestEngineResolvesBindingsIntoNestedPayload(t *testing.T) {
 	definition := validWorkflow()
-	engine := NewEngine(&engineExecutor{}, NewValidator(DefaultValidationLimits()), NewInMemoryStore(), nil)
+	definition.Steps[1].InputBindings = append(definition.Steps[1].InputBindings,
+		&pb.ResultBinding{SourceStepId: "plan", SourcePath: "metadata.confidence", TargetField: "context.confidence"},
+		&pb.ResultBinding{SourceStepId: "plan", SourcePath: "agent_id", TargetField: "planner_agent"},
+	)
+	executor := &bindingExecutor{}
+	engine := NewEngine(executor, NewValidator(DefaultValidationLimits()), NewInMemoryStore(), nil)
 
 	result, failure := engine.Execute(context.Background(), &pb.Task{}, definition)
 
-	if result != nil || failure == nil || failure.Code != pb.ErrorCode_ERROR_CODE_INVALID_TASK {
+	if failure != nil || result.Status != pb.WorkflowStatus_WORKFLOW_STATUS_COMPLETED {
 		t.Fatalf("result=%v failure=%v", result, failure)
+	}
+	if got := executor.received.Payload.Fields["route_result"].GetStructValue().Fields["next"].GetStringValue(); got != "BDI" {
+		t.Fatalf("bound route = %q", got)
+	}
+	if got := executor.received.Payload.Fields["context"].GetStructValue().Fields["confidence"].GetNumberValue(); got != 0.9 {
+		t.Fatalf("bound confidence = %v", got)
+	}
+	if got := executor.received.Payload.Fields["planner_agent"].GetStringValue(); got != "planner" {
+		t.Fatalf("bound agent = %q", got)
+	}
+}
+
+type parallelExecutor struct {
+	started          chan string
+	release          chan struct{}
+	mu               sync.Mutex
+	current, maximum int
+}
+
+func (e *parallelExecutor) Execute(ctx context.Context, task *pb.Task) (*pb.TaskResult, *pb.ErrorInfo) {
+	e.mu.Lock()
+	e.current++
+	if e.current > e.maximum {
+		e.maximum = e.current
+	}
+	e.mu.Unlock()
+	e.started <- task.Goal
+	select {
+	case <-e.release:
+	case <-ctx.Done():
+	}
+	e.mu.Lock()
+	e.current--
+	e.mu.Unlock()
+	output, _ := structpb.NewStruct(map[string]any{"step": task.Goal})
+	return &pb.TaskResult{TaskId: task.TaskId, AgentId: "parallel", Status: pb.TaskStatus_TASK_STATUS_COMPLETED, Output: output}, nil
+}
+
+func TestEngineRunsIndependentBranchesWithConfiguredLimit(t *testing.T) {
+	executor := &parallelExecutor{started: make(chan string, 3), release: make(chan struct{})}
+	definition := &pb.WorkflowDefinition{FinalStepId: "final", Steps: []*pb.WorkflowStep{step("a", "echo"), step("b", "echo"), step("final", "echo")}}
+	definition.Steps[2].DependsOn = []string{"a", "b"}
+	engine := NewEngineWithOptions(executor, NewValidator(DefaultValidationLimits()), NewInMemoryStore(), nil, EngineOptions{MaxParallelism: 2, TotalTimeout: time.Second})
+	done := make(chan *pb.WorkflowResult, 1)
+	go func() { result, _ := engine.Execute(context.Background(), &pb.Task{}, definition); done <- result }()
+	for i := 0; i < 2; i++ {
+		select {
+		case <-executor.started:
+		case <-time.After(time.Second):
+			t.Fatal("independent branches did not start concurrently")
+		}
+	}
+	executor.mu.Lock()
+	maximum := executor.maximum
+	executor.mu.Unlock()
+	if maximum != 2 {
+		t.Fatalf("maximum parallelism = %d", maximum)
+	}
+	executor.release <- struct{}{}
+	executor.release <- struct{}{}
+	select {
+	case <-executor.started:
+	case <-time.After(time.Second):
+		t.Fatal("final step did not start")
+	}
+	executor.release <- struct{}{}
+	if result := <-done; result.Status != pb.WorkflowStatus_WORKFLOW_STATUS_COMPLETED {
+		t.Fatalf("status = %v", result.Status)
+	}
+}
+
+func TestEngineContinuesIndependentBranchAndSkipsFailedDescendant(t *testing.T) {
+	executor := &engineExecutor{failAt: "a"}
+	a, b, blocked := step("a", "echo"), step("b", "echo"), step("blocked", "echo")
+	blocked.DependsOn = []string{"a"}
+	definition := &pb.WorkflowDefinition{Steps: []*pb.WorkflowStep{a, b, blocked}, FinalStepId: "b"}
+	result, failure := NewEngine(executor, NewValidator(DefaultValidationLimits()), NewInMemoryStore(), nil).Execute(context.Background(), &pb.Task{}, definition)
+	if failure != nil || result.Status != pb.WorkflowStatus_WORKFLOW_STATUS_FAILED {
+		t.Fatalf("result=%v failure=%v", result, failure)
+	}
+	if len(executor.calls) != 2 {
+		t.Fatalf("executor calls = %d", len(executor.calls))
+	}
+	if result.StepResults[2].Status != pb.WorkflowStepStatus_WORKFLOW_STEP_STATUS_SKIPPED {
+		t.Fatalf("blocked status = %v", result.StepResults[2].Status)
 	}
 }
