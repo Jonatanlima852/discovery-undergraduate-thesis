@@ -68,14 +68,14 @@ uv run --directory clients/submit-task python main.py \
   --capability echo
 ```
 
-Cenário heterogêneo atual:
+Cenário heterogêneo isolado:
 
 ```sh
-docker compose --env-file .env \
-  -f infra/docker-compose.yml \
-  --profile heterogeneous \
-  up --build -d
+docker compose \
+  --env-file scenarios/heterogeneous-route/.env \
+  -f scenarios/heterogeneous-route/compose.yaml \
+  up --build -d --wait
 
 uv run --directory clients/submit-task \
-  python ../../examples/demo_scenario/heterogeneous_demo.py
+  python ../../scenarios/heterogeneous-route/scenario.py
 ```

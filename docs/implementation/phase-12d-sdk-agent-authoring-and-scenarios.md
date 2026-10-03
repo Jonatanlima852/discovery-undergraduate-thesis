@@ -251,7 +251,7 @@ Atualizado em 2026-10-03.
 12D.2 BdiAgent declarativo           CONCLUÍDA
 12D.3 LlmAgent declarativo           CONCLUÍDA
 12D.4 Runtime de cenário             CONCLUÍDA
-12D.5 Deployment por cenário         PENDENTE
+12D.5 Deployment por cenário         CONCLUÍDA
 ```
 
 A 12D.1 introduziu `tg_sdk.Task` e `tg_sdk.TaskResult`, conversões
@@ -282,9 +282,23 @@ heterogêneo persiste o relatório com seus resultados e eventos. `submit()`
 permanece identificado como adaptador transitório; ele será substituído pela
 execução de workflow no runtime durante a fase 12E.
 
-Próximo incremento: concluir a 12D.5 criando uma topologia isolada para o
-cenário heterogêneo, healthchecks/readiness, documentação de portas/secrets e
-limpeza por Compose project.
+A 12D.5 criou `scenarios/heterogeneous-route` com Compose, entrada Python,
+`.env.example` e runbook próprios. Registry, Orchestrator e agentes possuem
+healthchecks; os dependentes aguardam o Registry saudável. Portas são
+configuráveis, a chave OpenAI é obrigatória sem ser persistida, e o project
+name isola rede e volume. O SDK passou a carregar a integração LLM sob demanda,
+evitando que agentes BDI instalem dependências OpenAI.
+
+Validação realizada em 2026-10-03: as quatro imagens foram construídas e os
+quatro serviços ficaram `healthy` em portas alternativas; Registry confirmou
+registro e heartbeat dos agentes BDI e LLM. A chamada real à OpenAI não foi
+repetida neste incremento, pois exige credencial/custo, e permanece como gate
+manual antes da coleta experimental.
+
+Com isso, as etapas de implementação da 12D estão concluídas. O próximo bloco
+é a Fase 10: timeout, retry e reassignment. Ela será implementada antes da 12E
+para que o futuro `TaskExecutor` e cada step de workflow reutilizem a mesma
+política de recuperação.
 
 ### 12D.1 — Modelos Python amigáveis
 
