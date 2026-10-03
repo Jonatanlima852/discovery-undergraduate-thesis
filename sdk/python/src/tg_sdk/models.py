@@ -54,6 +54,13 @@ def _trace_from_mapping(value: Mapping[str, str]) -> contract_pb2.TraceContext:
     )
 
 
+def _selection_policy_value(value: str) -> int:
+    name = value.upper()
+    if not name.startswith("SELECTION_POLICY_"):
+        name = f"SELECTION_POLICY_{name}"
+    return contract_pb2.SelectionPolicy.Value(name)
+
+
 @dataclass(frozen=True)
 class Task:
     """Task amigável para código de domínio, sem tipos protobuf."""
@@ -68,9 +75,17 @@ class Task:
     deadline_ms: int = 0
     parent_task_id: str = ""
     attempt: int = 0
+    selection_policy: str = "SELECTION_POLICY_FIRST_AVAILABLE"
     metadata: Mapping[str, Any] = field(default_factory=dict)
     bdi: Mapping[str, Any] = field(default_factory=dict)
     llm: Mapping[str, Any] = field(default_factory=dict)
+
+    def __post_init__(self):
+        name = self.selection_policy.upper()
+        if not name.startswith("SELECTION_POLICY_"):
+            name = f"SELECTION_POLICY_{name}"
+        contract_pb2.SelectionPolicy.Value(name)
+        object.__setattr__(self, "selection_policy", name)
 
     @classmethod
     def from_proto(cls, message: contract_pb2.Task) -> "Task":
@@ -89,6 +104,9 @@ class Task:
             deadline_ms=message.deadline_ms,
             parent_task_id=message.parent_task_id,
             attempt=message.attempt,
+            selection_policy=contract_pb2.SelectionPolicy.Name(
+                message.selection_policy
+            ),
             metadata=(
                 struct_to_dict(message.metadata)
                 if message.HasField("metadata")
@@ -130,6 +148,7 @@ class Task:
             deadline_ms=self.deadline_ms,
             parent_task_id=self.parent_task_id,
             attempt=self.attempt,
+            selection_policy=_selection_policy_value(self.selection_policy),
             metadata=mapping_to_struct(self.metadata),
         )
         if self.bdi:

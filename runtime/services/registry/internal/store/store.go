@@ -111,6 +111,8 @@ func (st *AgentStore) UpdateHealth(health *pb.HealthStatus) error {
 	}
 	now := time.Now()
 	agent.Status = health.Status
+	agent.CurrentTaskCount = health.CurrentTaskCount
+	agent.Load = health.Load
 	agent.UpdatedAt = timestamppb.New(now)
 	st.healthByAgent[health.AgentId] = HealthRecord{
 		LastHeartbeatAt:  now,

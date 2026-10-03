@@ -87,6 +87,8 @@ message AgentDescriptor {
   google.protobuf.Timestamp created_at = 8;
   google.protobuf.Timestamp updated_at = 9;
   google.protobuf.Struct    metadata   = 10;
+  int32                     current_task_count = 11;
+  double                    load               = 12;
 }
 
 // ─────────────────────────────────────────────

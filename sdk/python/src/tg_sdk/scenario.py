@@ -19,6 +19,16 @@ def _utc_now():
     return datetime.now(timezone.utc).isoformat()
 
 
+def _selection_policy_value(value):
+    name = str(value or "FIRST_AVAILABLE").upper()
+    if not name.startswith("SELECTION_POLICY_"):
+        name = f"SELECTION_POLICY_{name}"
+    try:
+        return contract_pb2.SelectionPolicy.Value(name)
+    except ValueError as error:
+        raise ValueError(f"unknown selection policy: {value}") from error
+
+
 class ScenarioResult:
     def __init__(self, result):
         self.raw = result
@@ -266,6 +276,7 @@ class Scenario:
         max_attempts=1,
         backoff_ms=0,
         exclude_failed_agent=False,
+        selection_policy="FIRST_AVAILABLE",
     ):
         task = contract_pb2.Task(
             task_id=str(uuid.uuid4()),
@@ -273,6 +284,7 @@ class Scenario:
             goal=goal,
             payload=mapping_to_struct(payload),
             required_capabilities=list(capabilities),
+            selection_policy=_selection_policy_value(selection_policy),
             deadline_ms=deadline_ms,
             retry_policy=contract_pb2.RetryPolicy(
                 max_attempts=max_attempts,
@@ -432,6 +444,9 @@ class Scenario:
                         )
                     ),
                     deadline_ms=declared.get("deadline_ms", 0),
+                    selection_policy=_selection_policy_value(
+                        declared.get("selection_policy", "FIRST_AVAILABLE")
+                    ),
                     retry_policy=contract_pb2.RetryPolicy(
                         max_attempts=declared.get("max_attempts", 1),
                         backoff_ms=declared.get("backoff_ms", 0),

@@ -825,19 +825,21 @@ func (x *AgentEndpoint) GetAddress() string {
 }
 
 type AgentDescriptor struct {
-	state           protoimpl.MessageState `protogen:"open.v1"`
-	AgentId         string                 `protobuf:"bytes,1,opt,name=agent_id,json=agentId,proto3" json:"agent_id,omitempty"`
-	Name            string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
-	Runtime         string                 `protobuf:"bytes,3,opt,name=runtime,proto3" json:"runtime,omitempty"`
-	ContractVersion string                 `protobuf:"bytes,4,opt,name=contract_version,json=contractVersion,proto3" json:"contract_version,omitempty"`
-	Capabilities    []*Capability          `protobuf:"bytes,5,rep,name=capabilities,proto3" json:"capabilities,omitempty"`
-	Endpoint        *AgentEndpoint         `protobuf:"bytes,6,opt,name=endpoint,proto3" json:"endpoint,omitempty"`
-	Status          AgentStatus            `protobuf:"varint,7,opt,name=status,proto3,enum=contract.v1.AgentStatus" json:"status,omitempty"`
-	CreatedAt       *timestamppb.Timestamp `protobuf:"bytes,8,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	UpdatedAt       *timestamppb.Timestamp `protobuf:"bytes,9,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
-	Metadata        *structpb.Struct       `protobuf:"bytes,10,opt,name=metadata,proto3" json:"metadata,omitempty"`
-	unknownFields   protoimpl.UnknownFields
-	sizeCache       protoimpl.SizeCache
+	state            protoimpl.MessageState `protogen:"open.v1"`
+	AgentId          string                 `protobuf:"bytes,1,opt,name=agent_id,json=agentId,proto3" json:"agent_id,omitempty"`
+	Name             string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	Runtime          string                 `protobuf:"bytes,3,opt,name=runtime,proto3" json:"runtime,omitempty"`
+	ContractVersion  string                 `protobuf:"bytes,4,opt,name=contract_version,json=contractVersion,proto3" json:"contract_version,omitempty"`
+	Capabilities     []*Capability          `protobuf:"bytes,5,rep,name=capabilities,proto3" json:"capabilities,omitempty"`
+	Endpoint         *AgentEndpoint         `protobuf:"bytes,6,opt,name=endpoint,proto3" json:"endpoint,omitempty"`
+	Status           AgentStatus            `protobuf:"varint,7,opt,name=status,proto3,enum=contract.v1.AgentStatus" json:"status,omitempty"`
+	CreatedAt        *timestamppb.Timestamp `protobuf:"bytes,8,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt        *timestamppb.Timestamp `protobuf:"bytes,9,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	Metadata         *structpb.Struct       `protobuf:"bytes,10,opt,name=metadata,proto3" json:"metadata,omitempty"`
+	CurrentTaskCount int32                  `protobuf:"varint,11,opt,name=current_task_count,json=currentTaskCount,proto3" json:"current_task_count,omitempty"`
+	Load             float64                `protobuf:"fixed64,12,opt,name=load,proto3" json:"load,omitempty"`
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
 }
 
 func (x *AgentDescriptor) Reset() {
@@ -938,6 +940,20 @@ func (x *AgentDescriptor) GetMetadata() *structpb.Struct {
 		return x.Metadata
 	}
 	return nil
+}
+
+func (x *AgentDescriptor) GetCurrentTaskCount() int32 {
+	if x != nil {
+		return x.CurrentTaskCount
+	}
+	return 0
+}
+
+func (x *AgentDescriptor) GetLoad() float64 {
+	if x != nil {
+		return x.Load
+	}
+	return 0
 }
 
 type HealthStatus struct {
@@ -3238,7 +3254,7 @@ const file_contract_v1_contract_proto_rawDesc = "" +
 	"\bmetadata\x18\a \x01(\v2\x17.google.protobuf.StructR\bmetadata\"E\n" +
 	"\rAgentEndpoint\x12\x1a\n" +
 	"\bprotocol\x18\x01 \x01(\tR\bprotocol\x12\x18\n" +
-	"\aaddress\x18\x02 \x01(\tR\aaddress\"\xd7\x03\n" +
+	"\aaddress\x18\x02 \x01(\tR\aaddress\"\x99\x04\n" +
 	"\x0fAgentDescriptor\x12\x19\n" +
 	"\bagent_id\x18\x01 \x01(\tR\aagentId\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12\x18\n" +
@@ -3252,7 +3268,9 @@ const file_contract_v1_contract_proto_rawDesc = "" +
 	"\n" +
 	"updated_at\x18\t \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\x123\n" +
 	"\bmetadata\x18\n" +
-	" \x01(\v2\x17.google.protobuf.StructR\bmetadata\"\xb9\x02\n" +
+	" \x01(\v2\x17.google.protobuf.StructR\bmetadata\x12,\n" +
+	"\x12current_task_count\x18\v \x01(\x05R\x10currentTaskCount\x12\x12\n" +
+	"\x04load\x18\f \x01(\x01R\x04load\"\xb9\x02\n" +
 	"\fHealthStatus\x12\x19\n" +
 	"\bagent_id\x18\x01 \x01(\tR\aagentId\x120\n" +
 	"\x06status\x18\x02 \x01(\x0e2\x18.contract.v1.AgentStatusR\x06status\x128\n" +

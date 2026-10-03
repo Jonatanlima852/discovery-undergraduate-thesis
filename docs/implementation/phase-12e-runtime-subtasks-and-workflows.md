@@ -731,8 +731,9 @@ workflow, run, step, task e trace, e o ambiente Docker foi removido após a
 verificação. Testes adicionais cobrem endpoint, store defensivo, ordem
 topológica, agregação, falha e propagação de `SKIPPED`.
 
-Próximo bloco: políticas de seleção (`ROUND_ROBIN` e `LEAST_LOADED`), seguido
-pelos benchmarks A-E, decisão de mensageria e congelamento do contrato.
+As políticas de seleção `ROUND_ROBIN` e `LEAST_LOADED` foram concluídas na
+Fase 11. Próximo bloco: benchmarks A-E, decisão de mensageria e congelamento do
+contrato.
 
 ### 12E.1 — Extrair `TaskExecutor`
 

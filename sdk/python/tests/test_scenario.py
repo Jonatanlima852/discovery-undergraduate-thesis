@@ -187,6 +187,7 @@ class ScenarioTests(unittest.TestCase):
             max_attempts=3,
             backoff_ms=10,
             exclude_failed_agent=True,
+            selection_policy="least_loaded",
         )
 
         task = stub.requests[0].task
@@ -194,6 +195,10 @@ class ScenarioTests(unittest.TestCase):
         self.assertEqual(task.retry_policy.max_attempts, 3)
         self.assertEqual(task.retry_policy.backoff_ms, 10)
         self.assertTrue(task.retry_policy.exclude_failed_agent)
+        self.assertEqual(
+            task.selection_policy,
+            contract_pb2.SELECTION_POLICY_LEAST_LOADED,
+        )
 
     def test_run_requires_entry_capability(self):
         scenario = Scenario("invalid", orchestrator_stub=FakeOrchestrator([]))

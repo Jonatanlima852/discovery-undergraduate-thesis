@@ -97,6 +97,9 @@ func TestHeartbeatRecoversDeadAgentAndStoresMetrics(t *testing.T) {
 	if agent.Status != pb.AgentStatus_AGENT_STATUS_ALIVE {
 		t.Fatalf("agent status = %s, want ALIVE", agent.Status)
 	}
+	if agent.CurrentTaskCount != 2 || agent.Load != 0.75 {
+		t.Fatalf("descriptor load = count %d load %.2f", agent.CurrentTaskCount, agent.Load)
+	}
 
 	health, err := agentStore.GetHealth("agent-1")
 	if err != nil {

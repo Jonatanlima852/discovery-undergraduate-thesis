@@ -33,6 +33,7 @@ type Executor struct {
 	runner         Runner
 	logger         EventLogger
 	defaultTimeout time.Duration
+	selector       *selection.Selector
 }
 
 func New(discoverer Discoverer, runner Runner, logger EventLogger, defaultTimeout time.Duration) *Executor {
@@ -41,7 +42,7 @@ func New(discoverer Discoverer, runner Runner, logger EventLogger, defaultTimeou
 	}
 	return &Executor{
 		discoverer: discoverer, runner: runner, logger: logger,
-		defaultTimeout: defaultTimeout,
+		defaultTimeout: defaultTimeout, selector: selection.New(),
 	}
 }
 
@@ -66,7 +67,7 @@ func (e *Executor) Execute(ctx context.Context, task *pb.Task) (*pb.TaskResult, 
 			return nil, operationalError(pb.ErrorCode_ERROR_CODE_AGENT_UNAVAILABLE, "no alternative compatible agent found", false)
 		}
 
-		agent := selection.FirstAvailable(agents)
+		agent := e.selector.Select(task.SelectionPolicy, agents)
 		attemptTask := proto.Clone(task).(*pb.Task)
 		attemptTask.Attempt = attempt
 		attemptTask.AssignedAgentId = agent.AgentId

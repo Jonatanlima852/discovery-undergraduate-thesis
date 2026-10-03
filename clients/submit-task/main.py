@@ -42,6 +42,12 @@ def parse_args():
         default=None,
         help="ID da task (gerado automaticamente se omitido)",
     )
+    parser.add_argument(
+        "--selection-policy",
+        choices=["first-available", "round-robin", "least-loaded", "random"],
+        default="first-available",
+        help="Política de seleção do agente (default: first-available)",
+    )
     return parser.parse_args()
 
 
@@ -72,6 +78,9 @@ def main():
         type=args.task_type,
         goal=args.goal,
         required_capabilities=[args.capability],
+        selection_policy=contract_pb2.SelectionPolicy.Value(
+            "SELECTION_POLICY_" + args.selection_policy.replace("-", "_").upper()
+        ),
         trace=contract_pb2.TraceContext(trace_id=trace_id),
     )
 
@@ -80,6 +89,7 @@ def main():
     print(f"  goal       : {args.goal}")
     print(f"  type       : {args.task_type}")
     print(f"  capability : {args.capability}")
+    print(f"  policy     : {args.selection_policy}")
     print(f"  trace_id   : {trace_id}")
     print()
 

@@ -159,3 +159,37 @@ func TestExecutorReturnsNonRetryableAgentFailure(t *testing.T) {
 		t.Fatalf("calls = %d, want 1", len(runner.calls))
 	}
 }
+
+func TestExecutorAppliesRoundRobinAcrossTasks(t *testing.T) {
+	discoverer := &fakeDiscoverer{agents: []*pb.AgentDescriptor{descriptor("b"), descriptor("a")}}
+	runner := &fakeRunner{run: func(_ context.Context, agent *pb.AgentDescriptor, task *pb.Task) (*pb.TaskResult, error) {
+		return &pb.TaskResult{TaskId: task.TaskId, AgentId: agent.AgentId, Status: pb.TaskStatus_TASK_STATUS_COMPLETED}, nil
+	}}
+	executor := New(discoverer, runner, nil, time.Second)
+	for range 3 {
+		task := retryTask()
+		task.SelectionPolicy = pb.SelectionPolicy_SELECTION_POLICY_ROUND_ROBIN
+		if _, failure := executor.Execute(context.Background(), task); failure != nil {
+			t.Fatal(failure)
+		}
+	}
+	if got := []string{runner.calls[0].agentID, runner.calls[1].agentID, runner.calls[2].agentID}; got[0] != "a" || got[1] != "b" || got[2] != "a" {
+		t.Fatalf("agents = %v", got)
+	}
+}
+
+func TestExecutorAppliesLeastLoadedFromDiscoveryState(t *testing.T) {
+	busy, idle := descriptor("busy"), descriptor("idle")
+	busy.Load, busy.CurrentTaskCount = 0.9, 3
+	idle.Load, idle.CurrentTaskCount = 0.1, 1
+	discoverer := &fakeDiscoverer{agents: []*pb.AgentDescriptor{busy, idle}}
+	runner := &fakeRunner{run: func(_ context.Context, agent *pb.AgentDescriptor, task *pb.Task) (*pb.TaskResult, error) {
+		return &pb.TaskResult{TaskId: task.TaskId, AgentId: agent.AgentId, Status: pb.TaskStatus_TASK_STATUS_COMPLETED}, nil
+	}}
+	task := retryTask()
+	task.SelectionPolicy = pb.SelectionPolicy_SELECTION_POLICY_LEAST_LOADED
+	result, failure := New(discoverer, runner, nil, time.Second).Execute(context.Background(), task)
+	if failure != nil || result.AgentId != "idle" {
+		t.Fatalf("result=%v failure=%v", result, failure)
+	}
+}

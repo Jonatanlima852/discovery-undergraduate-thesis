@@ -47,6 +47,7 @@ class TaskModelTests(unittest.TestCase):
             required_capabilities=("route-planning",),
             trace={"trace_id": "trace-1", "correlation_id": "run-1"},
             priority=3,
+            selection_policy="ROUND_ROBIN",
             parent_task_id="root-1",
             attempt=2,
             metadata={"source": "test"},
@@ -58,6 +59,10 @@ class TaskModelTests(unittest.TestCase):
         self.assertEqual(converted, task)
         self.assertIsInstance(converted.payload, dict)
         self.assertEqual(converted.payload["options"], ["B", "C"])
+        self.assertEqual(
+            converted.selection_policy,
+            "SELECTION_POLICY_ROUND_ROBIN",
+        )
 
     def test_result_round_trip_preserves_success(self):
         completed_at = datetime(2026, 10, 3, 12, 0, tzinfo=timezone.utc)
