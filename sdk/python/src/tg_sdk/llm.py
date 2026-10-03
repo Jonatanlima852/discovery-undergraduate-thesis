@@ -1,13 +1,13 @@
 import logging
 import os
+import time
 from dataclasses import dataclass
+from typing import Any, Mapping
 
-from google.protobuf import json_format, timestamp_pb2
 from pydantic import BaseModel
 
-from contract.v1 import contract_pb2
 from tg_sdk.agent import Agent
-from tg_sdk.models import mapping_to_struct
+from tg_sdk.models import Task, TaskResult
 
 log = logging.getLogger(__name__)
 
@@ -43,10 +43,49 @@ def llm_capability(capability_id, *, output_schema, result_mapper=None):
     return decorate
 
 
-def _now():
-    value = timestamp_pb2.Timestamp()
-    value.GetCurrentTime()
-    return value
+_OPERATIONAL_FIELDS = {
+    "task_id",
+    "agent_id",
+    "assigned_agent_id",
+    "trace",
+    "trace_id",
+    "span_id",
+    "parent_span_id",
+    "status",
+    "attempt",
+    "retry_policy",
+    "selection_policy",
+    "created_at",
+    "completed_at",
+}
+
+
+def _reject_operational_fields(value: Any, path="output"):
+    if isinstance(value, Mapping):
+        for key, nested in value.items():
+            if key in _OPERATIONAL_FIELDS:
+                raise LlmValidationError(
+                    f"model output cannot define operational field: {path}.{key}"
+                )
+            _reject_operational_fields(nested, f"{path}.{key}")
+    elif isinstance(value, list):
+        for index, nested in enumerate(value):
+            _reject_operational_fields(nested, f"{path}[{index}]")
+
+
+def _usage_metadata(response):
+    usage = getattr(response, "usage", None)
+    if usage is None:
+        return {}
+    if hasattr(usage, "model_dump"):
+        usage = usage.model_dump()
+    elif not isinstance(usage, Mapping):
+        usage = {
+            key: getattr(usage, key)
+            for key in ("input_tokens", "output_tokens", "total_tokens")
+            if getattr(usage, key, None) is not None
+        }
+    return {key: value for key, value in dict(usage).items() if value is not None}
 
 
 class LlmAgent(Agent):
@@ -88,16 +127,13 @@ class LlmAgent(Agent):
             )
         return requested[0]
 
-    def execute_task(self, task):
+    def handle(self, task: Task) -> TaskResult:
         retryable = False
+        started = time.perf_counter()
         try:
             capability = self._requested_capability(task)
             handler, declaration = self._handlers[capability]
-            context = (
-                json_format.MessageToDict(task.payload)
-                if task.HasField("payload")
-                else {}
-            )
+            context = dict(task.payload)
             prompt = handler(task.goal, context)
             if not isinstance(prompt, Prompt):
                 raise LlmValidationError("LLM capability handler must return Prompt")
@@ -120,6 +156,7 @@ class LlmAgent(Agent):
             output = mapper(parsed) if mapper else parsed.model_dump()
             if not isinstance(output, dict):
                 raise LlmValidationError("result_mapper must return an object")
+            _reject_operational_fields(output)
         except (LlmValidationError, ValueError) as error:
             message = str(error)
         except Exception as error:
@@ -131,27 +168,35 @@ class LlmAgent(Agent):
             message = f"OpenAI call failed ({type(error).__name__})"
             retryable = True
         else:
-            return contract_pb2.TaskResult(
+            metadata = {
+                "provider": "openai",
+                "model": self.model,
+                "latency_ms": round((time.perf_counter() - started) * 1000, 3),
+            }
+            usage = _usage_metadata(response)
+            if usage:
+                metadata["usage"] = usage
+            return TaskResult(
                 task_id=task.task_id,
                 agent_id=self.agent_id,
-                status=contract_pb2.TASK_STATUS_COMPLETED,
-                completed_at=_now(),
+                status="TASK_STATUS_COMPLETED",
                 trace=task.trace,
-                output=mapping_to_struct(output),
-                metadata=mapping_to_struct(
-                    {"provider": "openai", "model": self.model}
-                ),
+                output=output,
+                metadata=metadata,
             )
 
-        return contract_pb2.TaskResult(
+        return TaskResult(
             task_id=task.task_id,
             agent_id=self.agent_id,
-            status=contract_pb2.TASK_STATUS_FAILED,
-            completed_at=_now(),
+            status="TASK_STATUS_FAILED",
             trace=task.trace,
-            error=contract_pb2.ErrorInfo(
-                code=contract_pb2.ERROR_CODE_EXECUTION_FAILED,
-                message=message,
-                retryable=retryable,
-            ),
+            error_code="ERROR_CODE_EXECUTION_FAILED",
+            error_message=message,
+            retryable=retryable,
         )
+
+    def execute_task(self, task):
+        """Compatibilidade temporária com chamadas locais baseadas em protobuf."""
+        friendly = task if isinstance(task, Task) else Task.from_proto(task)
+        result = self.handle(friendly)
+        return result if isinstance(task, Task) else result.to_proto()

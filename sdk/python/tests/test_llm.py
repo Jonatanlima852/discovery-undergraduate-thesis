@@ -13,25 +13,43 @@ class StrictOutput(BaseModel):
     value: str
 
 
+class UnsafeOutput(BaseModel):
+    value: str
+    task_id: str
+
+
 class _FakeResponses:
-    def __init__(self, parsed):
+    def __init__(self, parsed, usage=None):
         self.parsed = parsed
+        self.usage = usage
         self.calls = []
 
     def parse(self, **kwargs):
         self.calls.append(kwargs)
-        return type("Response", (), {"output_parsed": self.parsed})()
+        return type(
+            "Response",
+            (),
+            {"output_parsed": self.parsed, "usage": self.usage},
+        )()
 
 
 class _FakeOpenAI:
-    def __init__(self, parsed):
-        self.responses = _FakeResponses(parsed)
+    def __init__(self, parsed, usage=None):
+        self.responses = _FakeResponses(parsed, usage)
 
 
 class StructuredAgent(LlmAgent):
     capabilities = ["structured"]
 
     @llm_capability("structured", output_schema=StrictOutput)
+    def structured(self, goal, context):
+        return Prompt(system="Return the value.", user=goal)
+
+
+class UnsafeAgent(LlmAgent):
+    capabilities = ["structured"]
+
+    @llm_capability("structured", output_schema=UnsafeOutput)
     def structured(self, goal, context):
         return Prompt(system="Return the value.", user=goal)
 
@@ -49,9 +67,9 @@ def make_task():
 
 
 class OpenAiLlmTests(unittest.TestCase):
-    def build_agent(self, parsed):
-        client = _FakeOpenAI(parsed)
-        agent = StructuredAgent(
+    def build_agent(self, parsed, usage=None, agent_type=StructuredAgent):
+        client = _FakeOpenAI(parsed, usage)
+        agent = agent_type(
             agent_id="llm",
             name="LLM",
             capabilities=["structured"],
@@ -70,6 +88,7 @@ class OpenAiLlmTests(unittest.TestCase):
 
         self.assertEqual(result.status, contract_pb2.TASK_STATUS_COMPLETED)
         self.assertEqual(result.output["value"], "A")
+        self.assertGreaterEqual(result.metadata["latency_ms"], 0)
         call = client.responses.calls[0]
         self.assertEqual(call["model"], "test-model")
         self.assertIs(call["text_format"], StrictOutput)
@@ -82,6 +101,29 @@ class OpenAiLlmTests(unittest.TestCase):
         self.assertEqual(result.status, contract_pb2.TASK_STATUS_FAILED)
         self.assertIn("structured output", result.error.message)
         self.assertFalse(result.error.retryable)
+
+    def test_records_provider_usage_when_available(self):
+        agent, _ = self.build_agent(
+            StrictOutput(value="A"),
+            usage={"input_tokens": 10, "output_tokens": 4, "total_tokens": 14},
+        )
+
+        result = agent.execute_task(make_task())
+
+        self.assertEqual(result.metadata["usage"]["input_tokens"], 10)
+        self.assertEqual(result.metadata["usage"]["total_tokens"], 14)
+
+    def test_rejects_operational_fields_from_model_output(self):
+        agent, _ = self.build_agent(
+            UnsafeOutput(value="A", task_id="injected"),
+            agent_type=UnsafeAgent,
+        )
+
+        result = agent.execute_task(make_task())
+
+        self.assertEqual(result.status, contract_pb2.TASK_STATUS_FAILED)
+        self.assertIn("operational field", result.error.message)
+        self.assertNotEqual(result.task_id, "injected")
 
 
 if __name__ == "__main__":

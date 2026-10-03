@@ -249,7 +249,7 @@ Atualizado em 2026-10-03.
 ```text
 12D.1 Modelos Python amigáveis       CONCLUÍDA
 12D.2 BdiAgent declarativo           CONCLUÍDA
-12D.3 LlmAgent declarativo           PARCIAL
+12D.3 LlmAgent declarativo           CONCLUÍDA
 12D.4 Runtime de cenário             PARCIAL
 12D.5 Deployment por cenário         PENDENTE
 ```
@@ -268,9 +268,17 @@ um adaptador temporário para chamadas protobuf existentes e passou a registrar
 agentes de rotas e agendamento, além da demo standalone, não importam mais
 protobuf no código de domínio.
 
-Próximo incremento: concluir a 12D.3, migrando `LlmAgent` e o agente LLM de
-domínio para os modelos públicos, adicionando métricas de uso/latência e
-reforçando a rejeição de campos operacionais na saída do modelo.
+A 12D.3 migrou o ciclo do `LlmAgent` para os modelos públicos, preservando o
+adaptador protobuf legado. O SDK registra provider, modelo, latência e uso de
+tokens quando informado pela Responses API. A validação percorre toda a saída
+estruturada e rejeita campos operacionais como IDs, trace, status, tentativa e
+políticas, inclusive dentro de subtasks. Os testes continuam usando cliente
+OpenAI falso e não fazem chamadas externas.
+
+Próximo incremento: concluir a 12D.4, ampliando `Scenario`/`ScenarioResult`
+com execução de uma entrada, assertions de agentes e tipos, relatório
+correlacionado e persistência de resultados, mantendo explícito o adaptador
+transitório até a fase 12E.
 
 ### 12D.1 — Modelos Python amigáveis
 
