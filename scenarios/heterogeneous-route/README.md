@@ -1,6 +1,6 @@
 # Cenário heterogêneo de rotas
 
-Topologia isolada para o fluxo transitório `LLM -> BDI -> LLM`. Execute os
+Topologia isolada para o workflow automático `LLM -> BDI -> LLM`. Execute os
 comandos a partir da raiz do repositório.
 
 ## Configuração
@@ -57,5 +57,8 @@ Use `down -v` somente quando também quiser apagar os eventos. O nome de
 projeto `tg-heterogeneous-route` mantém rede e volume separados do Compose
 baseline em `infra/`.
 
-O encadeamento das três tasks ainda acontece no adaptador Python. A fase 12E
-o moverá para o Orchestrator; a topologia do cenário continuará válida.
+O cliente envia somente a pergunta com a capability `task-decomposition`. O
+Orchestrator solicita o DAG ao agente LLM, valida-o, executa o agente BDI,
+injeta o resultado por bindings no step de explicação e agrega a resposta. O
+relatório inclui `workflow_id`, `run_id`, métricas de duração e resultados por
+step.

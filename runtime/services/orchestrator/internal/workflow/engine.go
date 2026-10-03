@@ -147,8 +147,18 @@ func (e *Engine) execute(parent context.Context, root *pb.Task, definition *pb.W
 						return
 					}
 					e.log(result, task.TaskId, "STEP_STARTED", step.StepId, "", 0)
+					startedAt := timestamppb.Now()
 					taskResult, failure := e.executor.Execute(ctx, task)
-					executions <- stepExecution{step: step, task: task, result: classifyStepResult(step.StepId, task, taskResult, failure, ctx.Err())}
+					stepResult := classifyStepResult(step.StepId, task, taskResult, failure, ctx.Err())
+					if stepResult.Result != nil {
+						if stepResult.Result.StartedAt == nil {
+							stepResult.Result.StartedAt = startedAt
+						}
+						if stepResult.Result.CompletedAt == nil {
+							stepResult.Result.CompletedAt = timestamppb.Now()
+						}
+					}
+					executions <- stepExecution{step: step, task: task, result: stepResult}
 				}(step)
 			}
 			wait.Wait()

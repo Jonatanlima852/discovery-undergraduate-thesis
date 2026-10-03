@@ -657,7 +657,7 @@ Atualizado em 2026-10-03.
 12E.4 Dependências e paralelismo       CONCLUÍDA
 12E.5 Planejamento automático          CONCLUÍDA
 12E.6 API assíncrona e persistência    CONCLUÍDA
-12E.7 Migrar cenário heterogêneo       PENDENTE
+12E.7 Migrar cenário heterogêneo       CONCLUÍDA
 ```
 
 A 12E.2 adicionou ao `contract.v1`, ainda com status experimental,
@@ -710,6 +710,20 @@ evitada agora para não introduzir uma dependência operacional antes dos
 benchmarks. Os testes com race detector cobrem início, consulta, conclusão,
 cancelamento e rejeição antes de iniciar.
 
+A 12E.7 removeu a coordenação de negócio do cliente heterogêneo. O script faz
+uma única chamada `Scenario.ask()` com a pergunta original; o runtime executa
+o planner LLM, o step BDI `route` e o step LLM `explain`, usando bindings para
+transportar output e metadata. `ScenarioWorkflowResult` verifica tipos de
+agente, serializa o resultado e registra duração total e por step; o engine
+completa timestamps ausentes dos agentes nos limites reais de execução.
+
+Validação integrada realizada em 2026-10-03 com a topologia Docker isolada:
+o workflow `planejar-e-explicar-rota` terminou como `COMPLETED`, o BDI escolheu
+`via_intermediate`, retornou `A -> B -> D` com distância 25, e o LLM explicou a
+decisão em português. Workflow, run, root task, steps, agents e trace foram
+correlacionados no resultado e nos eventos. O ambiente foi removido após o
+teste.
+
 Validação integrada realizada em 2026-10-03: o cenário isolado
 `scenarios/workflow-sequential` executou `first -> second`, ambos pelo agente
 `workflow-echo`, e retornou a saída do segundo step. Os eventos correlacionaram
@@ -717,9 +731,8 @@ workflow, run, step, task e trace, e o ambiente Docker foi removido após a
 verificação. Testes adicionais cobrem endpoint, store defensivo, ordem
 topológica, agregação, falha e propagação de `SKIPPED`.
 
-Próximo incremento: 12E.7, reduzindo o cenário heterogêneo a uma única pergunta
-e validando o fluxo real planner LLM -> agente BDI -> explicação LLM, com
-métricas e correlação por workflow e step.
+Próximo bloco: políticas de seleção (`ROUND_ROBIN` e `LEAST_LOADED`), seguido
+pelos benchmarks A-E, decisão de mensageria e congelamento do contrato.
 
 ### 12E.1 — Extrair `TaskExecutor`
 

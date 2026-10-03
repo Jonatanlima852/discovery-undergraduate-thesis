@@ -78,7 +78,43 @@ class FakeWorkflowOrchestrator:
         ))
 
 
+class FakeAutomaticWorkflowOrchestrator:
+    def SubmitTask(self, request):
+        task_result = TaskResult(
+            task_id="route-task", agent_id="bdi-1",
+            status="TASK_STATUS_COMPLETED",
+            metadata={"selected_plan": "via_intermediate"},
+            output={"route": ["A", "B", "D"], "distance": 25},
+        ).to_proto()
+        return contract_pb2.SubmitTaskResponse(
+            workflow_result=contract_pb2.WorkflowResult(
+                workflow_id="automatic", run_id="run-auto",
+                root_task_id=request.task.task_id,
+                status=contract_pb2.WORKFLOW_STATUS_COMPLETED,
+                step_results=[contract_pb2.WorkflowStepResult(
+                    step_id="route",
+                    status=contract_pb2.WORKFLOW_STEP_STATUS_COMPLETED,
+                    result=task_result,
+                )],
+                output=task_result.output,
+                trace=request.task.trace,
+            )
+        )
+
+
 class ScenarioTests(unittest.TestCase):
+
+    def test_ask_returns_automatically_planned_workflow(self):
+        scenario = Scenario(
+            "automatic", entry_capability="task-decomposition",
+            orchestrator_stub=FakeAutomaticWorkflowOrchestrator(),
+        )
+
+        result = scenario.ask("Planeje uma rota de A para D")
+
+        result.assert_completed().assert_agent_kind_used("bdi")
+        self.assertEqual(result.output["distance"], 25)
+        self.assertEqual(result.run_id, "run-auto")
 
     def test_run_submits_declared_entry_and_returns_report(self):
         stub = FakeOrchestrator([

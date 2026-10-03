@@ -134,12 +134,33 @@ class ScenarioWorkflowResult:
             struct_to_dict(result.output) if result.HasField("output") else {}
         )
         self.error = result.error.message if result.HasField("error") else None
+        self.duration_ms = self._duration_ms(
+            result.created_at if result.HasField("created_at") else None,
+            result.completed_at if result.HasField("completed_at") else None,
+        )
         self.steps = {}
         for step in result.step_results:
+            task_result = (
+                ScenarioResult(step.result) if step.HasField("result") else None
+            )
             self.steps[step.step_id] = {
                 "status": contract_pb2.WorkflowStepStatus.Name(step.status),
-                "result": ScenarioResult(step.result) if step.HasField("result") else None,
+                "result": task_result,
+                "duration_ms": self._duration_ms(
+                    step.result.started_at
+                    if step.HasField("result")
+                    and step.result.HasField("started_at") else None,
+                    step.result.completed_at
+                    if step.HasField("result")
+                    and step.result.HasField("completed_at") else None,
+                ),
             }
+
+    @staticmethod
+    def _duration_ms(start, end):
+        if start is None or end is None:
+            return None
+        return (end.ToDatetime() - start.ToDatetime()).total_seconds() * 1000
 
     def assert_completed(self):
         if self.raw.status != contract_pb2.WORKFLOW_STATUS_COMPLETED:
@@ -147,6 +168,15 @@ class ScenarioWorkflowResult:
                 f"workflow {self.workflow_id} did not complete: "
                 f"{self.error or self.status}"
             )
+        return self
+
+    def assert_agent_kind_used(self, kind):
+        normalized = kind.lower()
+        if not any(
+            value["result"] and value["result"].agent_kind == normalized
+            for value in self.steps.values()
+        ):
+            raise AssertionError(f"agent kind was not used: {kind}")
         return self
 
     def to_dict(self):
@@ -158,23 +188,34 @@ class ScenarioWorkflowResult:
             "status": self.status,
             "output": self.output,
             "error": self.error,
+            "duration_ms": self.duration_ms,
             "steps": {
                 step_id: {
                     "status": value["status"],
                     "result": (
                         value["result"].to_dict() if value["result"] else None
                     ),
+                    "duration_ms": value["duration_ms"],
                 }
                 for step_id, value in self.steps.items()
             },
         }
 
+    def save(self, path):
+        destination = Path(path)
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        destination.write_text(
+            json.dumps(self.to_dict(), ensure_ascii=False, indent=2) + "\n",
+            encoding="utf-8",
+        )
+        return destination
+
 
 class Scenario:
     """Cliente de cenário com trace compartilhado e valores Python.
 
-    ``submit`` é o adaptador transitório para múltiplas etapas enquanto o
-    orchestrator ainda não executa workflows. ``run`` envia uma única entrada.
+    ``submit`` envia uma task ou uma entrada que o orchestrator expande em
+    workflow. ``run`` e ``ask`` enviam uma única entrada.
     """
 
     def __init__(
@@ -198,6 +239,7 @@ class Scenario:
             )
         self._stub = orchestrator_stub
         self.results = {}
+        self.workflows = {}
         self.events = []
 
     def _event(self, event_type, step, **details):
@@ -257,6 +299,15 @@ class Scenario:
             )
             raise RuntimeError(f"{step}: {response.error.message}")
 
+        if response.HasField("workflow_result"):
+            result = ScenarioWorkflowResult(response.workflow_result)
+            self.workflows[step] = result
+            self._event(
+                "WORKFLOW_FINISHED", step, task_id=task.task_id,
+                run_id=result.run_id, status=result.status,
+            )
+            return result
+
         result = ScenarioResult(response.result)
         self.results[step] = result
         self._event(
@@ -268,10 +319,12 @@ class Scenario:
     def run(self, goal, *, payload=None, task_type="NATURAL_LANGUAGE"):
         if not self.entry_capability:
             raise ValueError("Scenario.run requires entry_capability")
-        self.submit(
+        result = self.submit(
             "entry", goal=goal, capabilities=[self.entry_capability],
             task_type=task_type, payload=payload,
         )
+        if isinstance(result, ScenarioWorkflowResult):
+            return result
         return self.report()
 
     ask = run

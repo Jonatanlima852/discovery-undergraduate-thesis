@@ -78,6 +78,11 @@ func TestEngineExecutesSequentialWorkflowAndAggregatesFinalOutput(t *testing.T) 
 	if result.Output.Fields["step"].GetStringValue() != "second" {
 		t.Fatalf("output = %v", result.Output)
 	}
+	for _, stepResult := range result.StepResults {
+		if stepResult.Result.StartedAt == nil || stepResult.Result.CompletedAt == nil {
+			t.Fatalf("step timestamps = %v", stepResult.Result)
+		}
+	}
 	stored, err := store.Get(result.RunId)
 	if err != nil || stored.Status != pb.WorkflowStatus_WORKFLOW_STATUS_COMPLETED || len(stored.StepResults) != 2 {
 		t.Fatalf("stored = %v err=%v", stored, err)
