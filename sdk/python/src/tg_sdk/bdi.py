@@ -5,6 +5,20 @@ from contract.v1 import contract_pb2
 from tg_sdk.agent import Agent
 
 
+def plan(_method=None, *, name=None, priority=0):
+    """Marca um método como plano BDI descoberto automaticamente."""
+    def decorate(method):
+        method._tg_bdi_plan = {
+            "name": name or method.__name__,
+            "priority": priority,
+        }
+        return method
+
+    if _method is None:
+        return decorate
+    return decorate(_method)
+
+
 def _now():
     ts = timestamp_pb2.Timestamp()
     ts.GetCurrentTime()
@@ -31,8 +45,51 @@ class BdiAgent(Agent):
 
     def __init__(self, *args, beliefs=None, plan_library=None, **kwargs):
         super().__init__(*args, **kwargs)
-        self.beliefs = {} if beliefs is None else beliefs
-        self.plan_library = list(plan_library or [])
+        declared_beliefs = getattr(type(self), "beliefs", {})
+        self.beliefs = (
+            dict(declared_beliefs)
+            if beliefs is None and isinstance(declared_beliefs, dict)
+            else (declared_beliefs if beliefs is None else beliefs)
+        )
+        self.plan_library = list(plan_library or self._declared_plans())
+
+    def _declared_plans(self):
+        declared = []
+        for attribute_name in dir(self):
+            method = getattr(self, attribute_name)
+            metadata = getattr(method, "_tg_bdi_plan", None)
+            if metadata is not None:
+                declared.append((metadata["priority"], attribute_name, method, metadata))
+        declared.sort(key=lambda item: (-item[0], item[1]))
+
+        wrapped = []
+        for _, _, method, metadata in declared:
+            def invoke(desire, beliefs, method=method, metadata=metadata):
+                candidate = method(desire, beliefs)
+                if candidate is None:
+                    return None
+                candidate = dict(candidate)
+                candidate.setdefault("name", metadata["name"])
+                candidate.setdefault(
+                    "reasoning_summary",
+                    f"plano {metadata['name']} aplicável",
+                )
+                if "output" not in candidate:
+                    reserved = {"name", "cost", "reasoning_summary"}
+                    output = {
+                        key: value
+                        for key, value in candidate.items()
+                        if key not in reserved
+                    }
+                    candidate = {
+                        key: value
+                        for key, value in candidate.items()
+                        if key in reserved
+                    }
+                    candidate["output"] = output
+                return candidate
+            wrapped.append(invoke)
+        return wrapped
 
     # --- pontos de extensão: subclasses devem sobrescrever ---
 
@@ -44,6 +101,10 @@ class BdiAgent(Agent):
         None se a task não tiver as informações necessárias.
         """
         raise NotImplementedError("subclasses devem implementar extract_desire")
+
+    def desire(self, task):
+        """Alias amigável preferido pela API pública."""
+        return self.extract_desire(task)
 
     def merge_external_beliefs(self, beliefs_text):
         """Hook opcional: interpreta task.bdi.beliefs (texto livre,
@@ -101,7 +162,12 @@ class BdiAgent(Agent):
     def execute_task(self, task):
         self._apply_external_bdi(task)
 
-        desire = self.extract_desire(task)
+        # Subclasses novas implementam desire(); as antigas continuam
+        # compatíveis sobrescrevendo extract_desire().
+        if type(self).desire is not BdiAgent.desire:
+            desire = self.desire(task)
+        else:
+            desire = self.extract_desire(task)
         if desire is None:
             return self._failed_result(
                 task,

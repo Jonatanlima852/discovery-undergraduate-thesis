@@ -56,6 +56,36 @@ class Agent:
         self._heartbeat_stop = threading.Event()
         self._heartbeat_thread = None
 
+    @classmethod
+    def from_env(cls, **overrides):
+        """Cria um agente usando a configuração operacional padrão.
+
+        Valores explícitos têm precedência sobre variáveis de ambiente.
+        Subclasses podem declarar ``default_*`` e ``capabilities`` como
+        atributos de classe, mantendo detalhes de deployment fora da lógica.
+        """
+        defaults = {
+            "agent_id": os.getenv(
+                "AGENT_ID", getattr(cls, "default_agent_id", cls.__name__.lower())
+            ),
+            "name": os.getenv(
+                "AGENT_NAME", getattr(cls, "default_name", cls.__name__)
+            ),
+            "capabilities": list(getattr(cls, "capabilities", [])),
+            "host": os.getenv("AGENT_HOST", "localhost"),
+            "port": int(
+                os.getenv("AGENT_PORT", str(getattr(cls, "default_port", 60051)))
+            ),
+            "registry_addr": os.getenv("REGISTRY_ADDR", "localhost:50051"),
+            "runtime": getattr(cls, "runtime_name", "python-sdk"),
+        }
+        defaults.update(overrides)
+        if not defaults["capabilities"]:
+            raise ValueError(
+                f"{cls.__name__} must declare at least one capability"
+            )
+        return cls(**defaults)
+
     def execute_task(self, task):
         """Recebe um contract_pb2.Task e devolve um contract_pb2.TaskResult.
 
