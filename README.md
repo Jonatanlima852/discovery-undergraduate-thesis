@@ -1,81 +1,89 @@
 # TG Runtime
 
-Runtime e SDK para cooperação entre agentes inteligentes heterogêneos,
-especialmente agentes BDI e agentes baseados em LLM.
+Guia rápido para executar o projeto. Rode todos os comandos a partir da raiz
+do repositório.
 
-O contrato comum cuida de descoberta, submissão de tasks, resultados,
-healthcheck e rastreabilidade. A arquitetura interna de cada agente continua
-livre.
+## Pré-requisitos
 
-## Experiência de desenvolvimento pretendida
+- Docker com Docker Compose v2;
+- Python 3.11 ou superior;
+- [`uv`](https://docs.astral.sh/uv/);
+- Go 1.22 ou superior, apenas para build e testes locais.
 
-Agentes Python devem ser classes pequenas fornecidas pelo `sdk/python`:
+Os stubs protobuf já estão versionados; não é necessário regenerá-los para a
+execução normal.
 
-```python
-from tg_sdk import BdiAgent, LlmAgent
+## Execução básica
 
-
-class RouteAgent(BdiAgent):
-    capabilities = ["route-planning"]
-    # declara crenças, desejo e planos
-
-
-class PlannerAgent(LlmAgent):
-    capabilities = ["task-decomposition"]
-    # declara prompt e schema de saída
-```
-
-As classes do SDK escondem protobuf, gRPC, registro, heartbeat, conversão de
-payload, montagem de resultados e integração com a OpenAI Responses API.
-
-Um cenário integrado deve declarar seus agentes em um arquivo Python simples,
-subir uma topologia Docker Compose isolada e enviar somente a pergunta inicial
-ao runtime. Registry e orchestrator descobrem os agentes conectados e
-coordenam o trabalho.
-
-## Estado atual
-
-O repositório já contém:
-
-- contrato protobuf compartilhado;
-- Registry e Orchestrator em Go;
-- SDK Python com `Agent` e uma primeira versão de `BdiAgent`;
-- agentes mock, BDI e LLM;
-- demo heterogênea LLM → BDI → LLM;
-- heartbeat, detecção de falhas e log de eventos.
-
-A próxima evolução planejada é transformar as abstrações BDI e LLM em APIs
-públicas e amigáveis do SDK e introduzir cenários Python de um arquivo com
-infraestrutura própria.
-
-Consulte:
-
-- `docs/README.md` para o mapa completo da documentação;
-- `docs/05-python-sdk-plan.md` para a API pretendida do SDK;
-- `docs/implementation/phase-12d-sdk-agent-authoring-and-scenarios.md` para o
-  plano detalhado de implementação;
-- `docs/13-runbook-execucao-e-testes-manuais.md` para executar o estado atual.
-
-## Execução atual
-
-Baseline:
+Suba o runtime e o agente de exemplo:
 
 ```sh
 make up
+```
 
+Envie uma tarefa:
+
+```sh
 uv run --directory clients/submit-task python main.py \
   --goal "Teste ponta a ponta" \
   --capability echo
 ```
 
-Cenário heterogêneo isolado:
+O resultado esperado contém `status: COMPLETED` e
+`agent_id: mock-agent-01`.
+
+Para acompanhar os logs e encerrar:
 
 ```sh
+make logs
+make down
+```
+
+## Cenários
+
+Cada cenário possui uma topologia Docker isolada e instruções próprias:
+
+- [workflow sequencial](scenarios/workflow-sequential/README.md);
+- [timeout e reassignment](scenarios/failure-reassignment/README.md);
+- [cooperação LLM + BDI](scenarios/heterogeneous-route/README.md).
+
+O cenário LLM + BDI exige uma chave da OpenAI. Antes de executá-lo:
+
+```sh
+cp scenarios/heterogeneous-route/.env.example \
+  scenarios/heterogeneous-route/.env
+```
+
+Preencha `OPENAI_API_KEY` no arquivo criado. O `.env` local não deve ser
+versionado.
+
+## Verificação local
+
+```sh
+make build
+make test
+uv run --directory sdk/python --with pytest pytest -q
+```
+
+Para validar apenas os arquivos Docker Compose:
+
+```sh
+docker compose -f infra/docker-compose.yml config --quiet
+docker compose -f scenarios/workflow-sequential/compose.yaml config --quiet
+docker compose -f scenarios/failure-reassignment/compose.yaml config --quiet
 docker compose \
   --env-file scenarios/heterogeneous-route/.env \
-  -f scenarios/heterogeneous-route/compose.yaml \
-  up --build -d --wait
+  -f scenarios/heterogeneous-route/compose.yaml config --quiet
+```
 
-uv run --directory clients/submit-task \
-  python ../../scenarios/heterogeneous-route/scenario.py
+## Comandos úteis
+
+```sh
+make help       # lista os comandos disponíveis
+make up         # constrói e inicia a execução básica
+make logs       # acompanha os logs
+make down       # encerra a execução básica
+make build      # compila os serviços Go
+make test       # executa os testes Go
+make proto      # regenera os stubs após mudanças no contrato
 ```
