@@ -1,5 +1,8 @@
 syntax = "proto3";
 
+// TG Runtime Contract 1.0.0 — frozen for the undergraduate thesis evaluation.
+// Compatible additions must preserve existing field numbers and semantics.
+
 package contract.v1;
 
 option go_package = "tg/runtime/gen/go/contract/v1;contractv1";
@@ -354,7 +357,7 @@ message SubmitTaskResponse {
 }
 
 // ─────────────────────────────────────────────
-// Workflow experimental (Fase 12E)
+// Workflow contract
 // O planner descreve trabalho; o runtime valida e controla a execução.
 // ─────────────────────────────────────────────
 

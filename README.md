@@ -63,6 +63,7 @@ versionado.
 ```sh
 make build
 make test
+make contract-check
 uv run --directory sdk/python --with pytest pytest -q
 ```
 

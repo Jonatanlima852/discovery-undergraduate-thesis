@@ -35,7 +35,7 @@ class Agent:
     """
 
     def __init__(self, agent_id, name, capabilities, host, port, registry_addr,
-                 runtime="python-sdk", contract_version="0.1.0",
+                 runtime="python-sdk", contract_version="1.0.0",
                  heartbeat_interval_seconds=None, reported_load=None):
         self.agent_id = agent_id
         self.name = name

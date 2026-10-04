@@ -6,6 +6,7 @@ import (
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"tg/runtime/contractversion"
 	pb "tg/runtime/gen/go/contract/v1"
 	"tg/runtime/services/registry/internal/store"
 )
@@ -23,6 +24,9 @@ func New(agentStore *store.AgentStore) *RegistryServer {
 func (srv *RegistryServer) RegisterAgent(_ context.Context, req *pb.RegisterAgentRequest) (*pb.RegisterAgentResponse, error) {
 	if req.Agent == nil || req.Agent.AgentId == "" {
 		return nil, status.Error(codes.InvalidArgument, "agent and agent_id are required")
+	}
+	if err := contractversion.Validate(req.Agent.ContractVersion); err != nil {
+		return nil, status.Error(codes.FailedPrecondition, err.Error())
 	}
 	srv.agentStore.Save(req.Agent)
 	slog.Info("agent registered", "agent_id", req.Agent.AgentId, "status", req.Agent.Status)

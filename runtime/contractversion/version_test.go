@@ -1,0 +1,16 @@
+package contractversion
+
+import "testing"
+
+func TestValidateAcceptsSupportedMajorAndRejectsInvalidVersions(t *testing.T) {
+	for _, version := range []string{"1.0.0", "1.4.2"} {
+		if err := Validate(version); err != nil {
+			t.Fatalf("Validate(%q) = %v", version, err)
+		}
+	}
+	for _, version := range []string{"", "0.1.0", "2.0.0", "1.0", "v1.0.0"} {
+		if err := Validate(version); err == nil {
+			t.Fatalf("Validate(%q) accepted", version)
+		}
+	}
+}
