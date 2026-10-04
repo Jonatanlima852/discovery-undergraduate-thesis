@@ -7,6 +7,7 @@ import sys
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../../sdk/python/src"))
 
 from tg_sdk import BdiAgent, plan
+from logistics.domain import plan_mission
 
 from beliefs import KNOWN_ROUTES, direct_distance, known_destinations_from
 
@@ -31,7 +32,7 @@ class RoutePlanningAgent(BdiAgent):
     o resultado — este agente só sabe extrair o desejo da task e
     interpretar crenças externas vindas via BdiExtension."""
 
-    capabilities = ["route-planning"]
+    capabilities = ["route-planning", "logistics-execution"]
     beliefs = KNOWN_ROUTES
     default_agent_id = "bdi-agent-01"
     default_name = "BDI Route Planning Agent"
@@ -47,10 +48,17 @@ class RoutePlanningAgent(BdiAgent):
            agente LLM) descreveu o objetivo em linguagem natural via
            BdiExtension em vez de montar o payload estruturado.
         """
+        if task.payload.get("mission") and task.payload.get("world"):
+            return {
+                "kind": "logistics-mission",
+                "mission": task.payload["mission"],
+                "world": task.payload["world"],
+            }
+
         origin = task.payload.get("origin")
         destination = task.payload.get("destination")
         if origin is not None and destination is not None:
-            return {"origin": str(origin), "destination": str(destination)}
+            return {"kind": "route", "origin": str(origin), "destination": str(destination)}
 
         if task.bdi.get("goal"):
             match = _GOAL_ROUTE_PATTERN.search(task.bdi["goal"])
@@ -59,12 +67,14 @@ class RoutePlanningAgent(BdiAgent):
                     "desejo extraído de task.bdi.goal task_id=%s goal=%r",
                     task.task_id, task.bdi["goal"],
                 )
-                return {"origin": match.group("origin"), "destination": match.group("destination")}
+                return {"kind": "route", "origin": match.group("origin"), "destination": match.group("destination")}
 
         return None
 
     @plan(name="direct_route")
     def direct_route(self, desire, beliefs):
+        if desire.get("kind") != "route":
+            return None
         origin, destination = desire["origin"], desire["destination"]
         distance = direct_distance(origin, destination, beliefs)
         if distance is None:
@@ -83,6 +93,8 @@ class RoutePlanningAgent(BdiAgent):
 
     @plan(name="via_intermediate")
     def via_intermediate(self, desire, beliefs):
+        if desire.get("kind") != "route":
+            return None
         origin, destination = desire["origin"], desire["destination"]
         best = None
         for intermediate in known_destinations_from(origin, beliefs):
@@ -111,6 +123,8 @@ class RoutePlanningAgent(BdiAgent):
 
     @plan(name="unknown_route", priority=-100)
     def unknown_route(self, desire, beliefs):
+        if desire.get("kind") != "route":
+            return None
         origin, destination = desire["origin"], desire["destination"]
         return {
             "reasoning_summary": (
@@ -121,6 +135,21 @@ class RoutePlanningAgent(BdiAgent):
             "destination": destination,
             "route": [],
             "distance": None,
+        }
+
+    @plan(name="safe_logistics_mission", priority=100)
+    def safe_logistics_mission(self, desire, beliefs):
+        if desire.get("kind") != "logistics-mission":
+            return None
+        result = plan_mission(desire["world"], desire["mission"])
+        return {
+            "cost": result["final_state"]["elapsed_minutes"] if result["feasible"] else 10**6,
+            "reasoning_summary": (
+                "plano validado por busca determinística e precondições do domínio"
+                if result["feasible"]
+                else "missão rejeitada porque nenhuma sequência satisfaz as restrições"
+            ),
+            **result,
         }
 
     def merge_external_beliefs(self, beliefs_text):
