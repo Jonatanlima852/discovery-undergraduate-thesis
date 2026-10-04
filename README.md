@@ -51,8 +51,9 @@ Cada cenário possui uma topologia Docker isolada e instruções próprias:
 
 - [workflow sequencial](scenarios/workflow-sequential/README.md);
 - [timeout e reassignment](scenarios/failure-reassignment/README.md);
-- [cooperação LLM + BDI](scenarios/heterogeneous-route/README.md).
+- [cooperação LLM + BDI](scenarios/heterogeneous-route/README.md);
 - [mensageria direta entre agentes](scenarios/messaging-basic/README.md).
+- [missão logística LLM + BDI](scenarios/logistics-mission/README.md).
 
 O cenário LLM + BDI exige uma chave da OpenAI. Antes de executá-lo:
 
@@ -85,6 +86,19 @@ O comando sobe uma topologia isolada, executa os cinco cenários, salva eventos,
 CSVs, JSON e gráfico em uma pasta datada dentro de `benchmarks/results/`, e
 remove os contêineres ao terminar.
 
+## Benchmark LLM-only × BDI-only × LLM + BDI
+
+O experimento de missão logística compara planejamento integral pela LLM,
+planejamento simbólico pelo BDI e interpretação LLM seguida de execução BDI.
+Ele mede validade, segurança, otimalidade, consistência, latência e tokens:
+
+```sh
+LOGISTICS_REPETITIONS=2 ./benchmarks/run-logistics.sh
+```
+
+Veja a [metodologia e os resultados](docs/implementation/phase-16-logistics-golden-benchmark.md)
+e o [exemplo executável](scenarios/logistics-mission/README.md).
+
 Para validar apenas os arquivos Docker Compose:
 
 ```sh
@@ -114,3 +128,4 @@ make proto      # regenera os stubs após mudanças no contrato
 - [Resultados de referência](docs/sample-outputs.md)
 - [Limitações e trabalhos futuros](docs/14-limitations-and-future-work.md)
 - [Roteiro de apresentação](docs/presentation-outline.md)
+- [Benchmark logístico LLM × BDI](docs/implementation/phase-16-logistics-golden-benchmark.md)

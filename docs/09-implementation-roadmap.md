@@ -544,3 +544,36 @@ repo explains contribution
 Status: concluída em 2026-10-04. O README contém quickstart e execução integral
 por Docker; arquitetura, saídas de referência, limitações, trabalhos futuros e
 roteiro de apresentação estão versionados em `docs/`.
+
+---
+
+# Phase 16 — Constrained logistics evaluation
+
+## Goal
+
+Evaluate the central LLM + BDI hypothesis with an executable domain and an
+independent deterministic oracle.
+
+## Tasks
+
+```text
+1. Define a logistics world with hard operational constraints.
+2. Implement deterministic planning and action simulation.
+3. Compare BDI-only, LLM-only, and LLM + BDI.
+4. Measure validity, safety, optimality, consistency, latency, and tokens.
+5. Save raw outputs and aggregate artifacts.
+6. Document claims and experimental limitations.
+```
+
+## Definition of done
+
+```text
+dataset and world are versioned
+oracle tests pass
+all three strategies run through the runtime
+selected results are reproducible and documented
+conclusions do not exceed the observed evidence
+```
+
+Status: concluída e executada em 2026-10-04. Metodologia, resultados e limites
+estão em `implementation/phase-16-logistics-golden-benchmark.md`.
