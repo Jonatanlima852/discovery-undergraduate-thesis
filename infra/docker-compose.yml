@@ -57,6 +57,19 @@ services:
     depends_on:
       - registry
 
+  client-runner:
+    profiles:
+      - client
+    build:
+      context: ..
+      dockerfile: clients/submit-task/Dockerfile
+    environment:
+      ORCHESTRATOR_ADDR: "orchestrator:50052"
+      TG_SDK_PATH: "/sdk"
+    depends_on:
+      - orchestrator
+    command: ["--goal", "Teste ponta a ponta", "--capability", "echo"]
+
   llm-agent:
     profiles:
       - llm

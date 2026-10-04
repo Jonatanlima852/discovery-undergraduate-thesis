@@ -524,7 +524,7 @@ Prepare repository for evaluation and presentation.
 1. Clean README.
 2. Add quickstart.
 3. Add architecture diagram.
-4. Add benchmark instructions.ExecuteTask
+4. Add benchmark instructions.
 5. Add demo script.
 6. Add sample outputs.
 7. Add limitations.
@@ -540,3 +540,7 @@ fresh clone can run benchmarks
 repo explains architecture
 repo explains contribution
 ```
+
+Status: concluída em 2026-10-04. O README contém quickstart e execução integral
+por Docker; arquitetura, saídas de referência, limitações, trabalhos futuros e
+roteiro de apresentação estão versionados em `docs/`.

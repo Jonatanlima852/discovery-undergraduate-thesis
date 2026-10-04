@@ -32,6 +32,12 @@ uv run --directory clients/submit-task python main.py \
 O resultado esperado contém `status: COMPLETED` e
 `agent_id: mock-agent-01`.
 
+Também é possível executar tudo pelo Docker, sem ambiente Python local:
+
+```sh
+make demo
+```
+
 Para acompanhar os logs e encerrar:
 
 ```sh
@@ -101,3 +107,10 @@ make build      # compila os serviços Go
 make test       # executa os testes Go
 make proto      # regenera os stubs após mudanças no contrato
 ```
+
+## Documentação para avaliação
+
+- [Arquitetura](docs/03-architecture.md)
+- [Resultados de referência](docs/sample-outputs.md)
+- [Limitações e trabalhos futuros](docs/14-limitations-and-future-work.md)
+- [Roteiro de apresentação](docs/presentation-outline.md)

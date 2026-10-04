@@ -71,9 +71,12 @@ test:
 
 # up / down / logs — Docker Compose
 
-.PHONY: up
+.PHONY: up demo
 up:
 	docker compose -f infra/docker-compose.yml up --build -d
+
+demo: up
+	docker compose -f infra/docker-compose.yml --profile client run --build --rm client-runner
 
 .PHONY: down
 down:
@@ -95,6 +98,7 @@ help:
 	@echo "  make build       Compila os servicos Go"
 	@echo "  make test        Roda os testes Go"
 	@echo "  make up          Sobe o sistema via Docker Compose"
+	@echo "  make demo        Sobe o sistema e executa uma task echo"
 	@echo "  make down        Para e remove os conteineres"
 	@echo "  make logs        Mostra logs de todos os servicos"
 	@echo ""

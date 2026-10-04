@@ -7,7 +7,13 @@ import uuid
 import grpc
 from google.protobuf import json_format
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../../sdk/python/src"))
+sys.path.insert(
+    0,
+    os.getenv(
+        "TG_SDK_PATH",
+        os.path.join(os.path.dirname(__file__), "../../sdk/python/src"),
+    ),
+)
 
 from contract.v1 import contract_pb2, contract_pb2_grpc
 
