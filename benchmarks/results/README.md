@@ -9,7 +9,8 @@
 - `latency.svg`: comparação visual das latências médias;
 - `agent-distribution.svg`: distribuição por política e agente;
 - `recovery.svg`: tempo de recuperação e latência total com falha;
-- `message-count.svg`: contagem de envelopes (zero na arquitetura atual).
+- `message-count.svg`: indicação de zero envelopes nos workflows avaliados,
+  que usam chamadas diretas a AgentService; o broker existe em outro cenário.
 
 As execuções são ignoradas pelo Git para evitar misturar resultados locais e
 credenciais indiretas com o código. Resultados escolhidos para a monografia
@@ -19,4 +20,4 @@ O experimento de missão logística usa `./benchmarks/run-logistics.sh` e produz
 `logistics-results.json`, `logistics-summary.csv`, `logistics-quality.svg` e
 `events.jsonl`. A execução selecionada `logistics-20261004T-final-v2` foi
 versionada deliberadamente como evidência da avaliação descrita em
-`docs/implementation/phase-16-logistics-golden-benchmark.md`.
+[guia público de avaliação](../../docs/evaluation.md).

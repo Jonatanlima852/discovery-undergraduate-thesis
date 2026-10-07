@@ -1,6 +1,6 @@
 # Cenário de timeout e reassignment
 
-Este cenário valida deterministicamente a Fase 10:
+Este cenário valida timeout, exclusão de agente e nova atribuição:
 
 ```text
 a-slow recebe a tentativa 1 -> timeout em 100 ms
@@ -36,3 +36,7 @@ Encerre e remova os artefatos isolados:
 ```sh
 docker compose -f scenarios/failure-reassignment/compose.yaml down -v
 ```
+
+`down -v` apaga o volume de eventos deste cenário. Para preservá-lo, omita `-v`.
+
+[Catálogo de cenários](../../docs/scenarios.md)

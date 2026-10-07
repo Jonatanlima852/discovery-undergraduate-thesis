@@ -62,3 +62,5 @@ Orchestrator solicita o DAG ao agente LLM, valida-o, executa o agente BDI,
 injeta o resultado por bindings no step de explicação e agrega a resposta. O
 relatório inclui `workflow_id`, `run_id`, métricas de duração e resultados por
 step.
+
+[Catálogo de cenários](../../docs/scenarios.md)

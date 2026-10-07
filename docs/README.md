@@ -1,89 +1,38 @@
-# TG Runtime for Heterogeneous Intelligent Agents
+# Documentação do TG Runtime
 
-This repository contains the reference implementation for a graduation thesis project on interoperable cooperation among heterogeneous intelligent agents.
+Esta documentação descreve a implementação atual e os caminhos para executar,
+entender, desenvolver e avaliar o projeto. Todos os comandos partem da raiz
+do repositório, salvo indicação explícita.
 
-The project proposes, implements, and evaluates an interoperability contract for agents with different internal architectures, especially BDI agents and LLM-based agents. The contract is supported by a distributed runtime responsible for discovery, messaging, orchestration, health monitoring, failure detection, and task reassignment.
+## Caminhos de leitura
 
-## Core idea
-
-The runtime does not try to replace agent reasoning. Instead, it provides a common operational layer so that different agents can cooperate through the same protocol.
-
-The main separation is:
-
-```text
-Runtime
-  discovery
-  orchestration
-  task lifecycle
-  messaging
-  failure detection
-  observability
-
-Agent
-  domain reasoning
-  plan execution
-  BDI deliberation
-  LLM reasoning
-  tool usage
-```
-
-## Main components
-
-```text
-registry-service
-orchestrator-service
-messaging-service
-failure-detector
-observability/event-log
-python-sdk
-mock-agents
-bdi-agent
-llm-agent
-```
-
-## Recommended implementation order
-
-```text
-1. Define contract v0.1
-2. Write .proto files
-3. Implement registry-service
-4. Implement orchestrator-service with FIRST_AVAILABLE policy
-5. Implement mock agents
-6. Add Docker Compose
-7. Implement Python SDK
-8. Implement simplified BDI agent
-9. Add messaging-service
-10. Add LLM planner/explainer agent
-11. Add heartbeat and failure detection
-12. Add task reassignment
-13. Add observability events
-14. Run benchmarks
-15. Freeze contract v1.0
-```
-
-## Documentation map
-
-| File | Purpose |
+| Objetivo | Sequência sugerida |
 |---|---|
-| `01-project-scope.md` | Project scope, boundaries, and contribution |
-| `02-contract-specification.md` | Contract entities and fields |
-| `03-architecture.md` | Runtime architecture and component responsibilities |
-| `04-orchestrator-design.md` | How orchestration works and why it is not fully LLM-based |
-| `05-python-sdk-plan.md` | Python SDK design and expected developer experience |
-| `06-agent-models.md` | Mock, BDI, and LLM agent roles |
-| `07-messaging-and-failures.md` | Messaging, heartbeat, failure detection, and reassignment |
-| `08-benchmarks-and-evaluation.md` | Metrics, scenarios, and expected experiments |
-| `09-implementation-roadmap.md` | Step-by-step technical roadmap |
-| `10-repo-structure.md` | Suggested repository organization |
-| `11-decisions-and-tradeoffs.md` | Design decisions and trade-offs |
-| `12-definition-of-done.md` | Completion criteria for each phase |
-| `13-runbook-execucao-e-testes-manuais.md` | Como subir, testar manualmente, coletar métricas e encerrar o sistema |
-| `implementation/phase-16-logistics-golden-benchmark.md` | Método e resultados do benchmark LLM-only, BDI-only e híbrido |
+| Executar pela primeira vez | [Primeira execução](quickstart.md) → [cenários](scenarios.md) |
+| Entender a solução | [Arquitetura](architecture.md) → [contrato e configuração](reference.md) |
+| Alterar o código | [Desenvolvimento](development.md) → referência e testes do componente |
+| Avaliar o TCC | [Avaliação](evaluation.md) → artefatos → [limitações](limitations.md) |
 
-## Current evaluation extension
+## Guias e referência
 
-The implementation roadmap is complete. The central heterogeneous-agent
-evaluation is documented in
-`implementation/phase-16-logistics-golden-benchmark.md`: a constrained
-logistics domain compares LLM-only, BDI-only, and LLM + BDI against an
-independent action simulator.
+- [Primeira execução](quickstart.md): requisitos, comandos Docker, resultado e diagnóstico.
+- [Arquitetura e conceitos](architecture.md): responsabilidades, fluxos e glossário.
+- [Catálogo de cenários](scenarios.md): objetivos, requisitos e resultados esperados.
+- [Desenvolvimento](development.md): mapa do código, ambiente, SDK e verificações.
+- [Contrato e configuração](reference.md): APIs, versões, políticas e variáveis.
+- [Avaliação e evidências](evaluation.md): perguntas, resultados e reprodução.
+- [Escopo e limitações](limitations.md): fronteiras operacionais e experimentais.
+
+## Como manter estes guias
+
+Ao mudar uma API, configuração ou comando, atualize o guia correspondente.
+Os READMEs dos cenários são a referência para suas topologias; este índice
+aponta para eles. Resultados publicados devem identificar sua execução e
+permanecer distintos de expectativas de uma nova coleta.
+
+`internal-notes/` é o acervo interno de aprendizado e acompanhamento do autor.
+Pode conter propostas antigas e arquivos somente locais. Nenhum guia público
+depende de sua leitura. O contrato executável está no `.proto` e o comportamento
+atual pode ser consultado nos arquivos de implementação vinculados nestas páginas.
+
+[Voltar ao projeto](../README.md)

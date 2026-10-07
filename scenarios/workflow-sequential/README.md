@@ -21,3 +21,7 @@ docker compose -f scenarios/workflow-sequential/compose.yaml down -v
 
 O resultado esperado é `CENÁRIO APROVADO`. Os eventos no volume do
 Orchestrator permitem reconstruir workflow, run, steps e tasks materializadas.
+
+`down -v` apaga o volume de eventos deste cenário. Para preservá-lo, omita `-v`.
+
+[Catálogo de cenários](../../docs/scenarios.md)

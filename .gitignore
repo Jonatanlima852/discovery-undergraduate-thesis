@@ -62,6 +62,6 @@ Thumbs.db
 *.swp
 *.swo
 
-# Docs 
+# Notas internas de aprendizado e acompanhamento
 CLAUDE.md
-docs
+/internal-notes/*

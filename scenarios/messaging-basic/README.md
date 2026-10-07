@@ -15,3 +15,5 @@ docker compose -f scenarios/messaging-basic/compose.yaml down
 
 O cenário deve terminar com `CENÁRIO APROVADO`. O broker é em memória e possui
 semântica at-most-once; mensagens pendentes não sobrevivem a reinício.
+
+[Catálogo de cenários](../../docs/scenarios.md)

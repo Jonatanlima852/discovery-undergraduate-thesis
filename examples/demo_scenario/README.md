@@ -1,7 +1,7 @@
 # Cenário heterogêneo LLM + BDI
 
-Este cenário usa a API pública `tg_sdk.Scenario` para executar três tasks
-correlacionadas:
+Este cenário usa a API pública `tg_sdk.Scenario` para enviar uma pergunta ao
+runtime, que coordena o planejamento e a execução das etapas:
 
 ```text
 LLM decompõe -> BDI planeja rota -> LLM explica
@@ -30,7 +30,10 @@ O arquivo do cenário trabalha apenas com valores Python. Construção de
 protobuf, IDs, trace compartilhado, conexão gRPC e submissão ao orchestrator
 ficam encapsulados pelo SDK.
 
-O encadeamento das três etapas ainda ocorre no cliente porque o orchestrator
-atual executa uma task por chamada. Quando houver suporte a workflows, o
-cenário continuará enviando apenas a pergunta inicial e o adaptador transitório
-poderá ser removido sem alterar as classes dos agentes.
+O encadeamento ocorre no Orchestrator: o planner obtém um DAG, o runtime valida
+as dependências e bindings e executa os steps de rota e explicação. O cliente
+recebe `ScenarioWorkflowResult` e salva o relatório correlacionado.
+
+Para uma topologia dedicada com instruções completas de configuração e
+encerramento, prefira o [guia do cenário](../../scenarios/heterogeneous-route/README.md).
+Veja também a [arquitetura](../../docs/architecture.md).

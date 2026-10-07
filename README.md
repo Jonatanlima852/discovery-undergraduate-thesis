@@ -1,131 +1,63 @@
-# TG Runtime
+# TG Runtime — cooperação entre agentes heterogêneos
 
-Guia rápido para executar o projeto. Rode todos os comandos a partir da raiz
-do repositório.
+Implementação de referência de um trabalho de graduação sobre
+**interoperabilidade entre agentes inteligentes**. O projeto define um contrato
+comum para que agentes com arquiteturas diferentes sejam descobertos, recebam
+tarefas, troquem mensagens e cooperem em workflows.
 
-## Pré-requisitos
+O runtime em Go coordena a execução e trata falhas. Os agentes Python mantêm
+sua lógica de domínio: um agente LLM pode interpretar uma solicitação e um
+agente BDI pode escolher um plano a partir de crenças e restrições.
 
-- Docker com Docker Compose v2;
-- Python 3.11 ou superior;
-- [`uv`](https://docs.astral.sh/uv/);
-- Go 1.22 ou superior, apenas para build e testes locais.
-
-Os stubs protobuf já estão versionados; não é necessário regenerá-los para a
-execução normal.
-
-## Execução básica
-
-Suba o runtime e o agente de exemplo:
-
-```sh
-make up
+```mermaid
+flowchart LR
+    C[Cliente] --> O[Orchestrator em Go]
+    O --> R[Registry: descoberta e saúde]
+    O --> L[Agente LLM em Python]
+    O --> B[Agente BDI em Python]
+    O --> E[Eventos e resultados]
 ```
 
-Envie uma tarefa:
+A comunicação usa gRPC e Protocol Buffers. O contrato `contract.v1` está na
+versão `1.0.0`; os stubs Go e Python estão incluídos no repositório.
 
-```sh
-uv run --directory clients/submit-task python main.py \
-  --goal "Teste ponta a ponta" \
-  --capability echo
-```
+## Escolha seu caminho
 
-O resultado esperado contém `status: COMPLETED` e
-`agent_id: mock-agent-01`.
+| Quero… | Comece aqui |
+|---|---|
+| Experimentar sem chave de LLM | [Primeira execução](docs/quickstart.md) |
+| Entender como funciona | [Arquitetura e conceitos](docs/architecture.md) |
+| Explorar cooperação, falhas e mensagens | [Catálogo de cenários](docs/scenarios.md) |
+| Desenvolver ou estender o projeto | [Guia de desenvolvimento](docs/development.md) |
+| Avaliar o trabalho de graduação | [Guia de avaliação e evidências](docs/evaluation.md) |
 
-Também é possível executar tudo pelo Docker, sem ambiente Python local:
+## Primeira experiência
 
-```sh
-make demo
-```
+Com Docker e Docker Compose v2, a demonstração básica executa uma tarefa
+`echo` pelo Registry, Orchestrator e agente mock, sem chave de LLM nem
+instalação local de Go ou Python. A primeira preparação baixa dependências e
+constrói imagens.
 
-Para acompanhar os logs e encerrar:
+O [guia de primeira execução](docs/quickstart.md) reúne os comandos, a
+verificação de prontidão, o resultado esperado e o encerramento do ambiente.
+Depois, o [workflow sequencial](scenarios/workflow-sequential/README.md)
+demonstra a coordenação de duas tarefas.
 
-```sh
-make logs
-make down
-```
+## O que está implementado
 
-## Cenários
+- Registro e descoberta por capacidade, heartbeat e detecção de falhas.
+- Seleção de agentes, timeout por tentativa, retry e reassignment.
+- Workflows com dependências, bindings de resultados, paralelismo e API assíncrona.
+- Mensageria em memória entre agentes.
+- SDK Python com `Agent`, `BdiAgent`, `LlmAgent` e `Scenario`.
+- Cenários executáveis, benchmarks A–E e comparação logística BDI/LLM/híbrido.
 
-Cada cenário possui uma topologia Docker isolada e instruções próprias:
+É um protótipo de pesquisa para experimentos locais. Estado em memória,
+mensageria sem reentrega e dependência do provedor LLM são limites relevantes;
+veja [escopo e limitações](docs/limitations.md).
 
-- [workflow sequencial](scenarios/workflow-sequential/README.md);
-- [timeout e reassignment](scenarios/failure-reassignment/README.md);
-- [cooperação LLM + BDI](scenarios/heterogeneous-route/README.md);
-- [mensageria direta entre agentes](scenarios/messaging-basic/README.md).
-- [missão logística LLM + BDI](scenarios/logistics-mission/README.md).
+## Navegação
 
-O cenário LLM + BDI exige uma chave da OpenAI. Antes de executá-lo:
-
-```sh
-cp scenarios/heterogeneous-route/.env.example \
-  scenarios/heterogeneous-route/.env
-```
-
-Preencha `OPENAI_API_KEY` no arquivo criado. O `.env` local não deve ser
-versionado.
-
-## Verificação local
-
-```sh
-make build
-make test
-make contract-check
-uv run --directory sdk/python --with pytest pytest -q
-```
-
-## Benchmarks A-E
-
-Com `OPENAI_API_KEY` configurada no `.env`, execute:
-
-```sh
-./benchmarks/run.sh
-```
-
-O comando sobe uma topologia isolada, executa os cinco cenários, salva eventos,
-CSVs, JSON e gráfico em uma pasta datada dentro de `benchmarks/results/`, e
-remove os contêineres ao terminar.
-
-## Benchmark LLM-only × BDI-only × LLM + BDI
-
-O experimento de missão logística compara planejamento integral pela LLM,
-planejamento simbólico pelo BDI e interpretação LLM seguida de execução BDI.
-Ele mede validade, segurança, otimalidade, consistência, latência e tokens:
-
-```sh
-LOGISTICS_REPETITIONS=2 ./benchmarks/run-logistics.sh
-```
-
-Veja a [metodologia e os resultados](docs/implementation/phase-16-logistics-golden-benchmark.md)
-e o [exemplo executável](scenarios/logistics-mission/README.md).
-
-Para validar apenas os arquivos Docker Compose:
-
-```sh
-docker compose -f infra/docker-compose.yml config --quiet
-docker compose -f scenarios/workflow-sequential/compose.yaml config --quiet
-docker compose -f scenarios/failure-reassignment/compose.yaml config --quiet
-docker compose \
-  --env-file scenarios/heterogeneous-route/.env \
-  -f scenarios/heterogeneous-route/compose.yaml config --quiet
-```
-
-## Comandos úteis
-
-```sh
-make help       # lista os comandos disponíveis
-make up         # constrói e inicia a execução básica
-make logs       # acompanha os logs
-make down       # encerra a execução básica
-make build      # compila os serviços Go
-make test       # executa os testes Go
-make proto      # regenera os stubs após mudanças no contrato
-```
-
-## Documentação para avaliação
-
-- [Arquitetura](docs/03-architecture.md)
-- [Resultados de referência](docs/sample-outputs.md)
-- [Limitações e trabalhos futuros](docs/14-limitations-and-future-work.md)
-- [Roteiro de apresentação](docs/presentation-outline.md)
-- [Benchmark logístico LLM × BDI](docs/implementation/phase-16-logistics-golden-benchmark.md)
+O [índice da documentação pública](docs/README.md) organiza os guias e a
+referência técnica. O [mapa do código](docs/development.md#mapa-do-repositório)
+indica os pontos de entrada da implementação. A licença é [Apache 2.0](LICENSE).
