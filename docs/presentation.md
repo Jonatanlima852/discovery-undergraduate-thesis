@@ -19,13 +19,11 @@ a última execução iniciada, não necessariamente a que está sendo apresentad
 ./tg scenario failure-reassignment
 ```
 
-Inicie `npm run dev --prefix tools/inspector` e abra `http://127.0.0.1:4173`.
-Selecione os
-arquivos da pasta `.tg/runs/ID/` desejada, incluindo `summary.json`, `result.json`,
-eventos e estados. O [guia do visualizador](../tools/inspector/README.md) explica
-como acessar essa pasta oculta.
+Inicie a API e o frontend conforme o
+[guia do visualizador](../tools/inspector/README.md), abra
+`http://127.0.0.1:4173` e escolha uma das execuções listadas de `.tg/runs`.
 
-Para apresentar sem Docker, use o botão **Explorar exemplo de recuperação**.
+Para apresentar sem Docker, use o botão **Abrir exemplo**.
 Ele mostra um registro real incluído no repositório e identificado como exemplo.
 Para outros cenários, preserve previamente as pastas de resultados. Diga
 explicitamente quando estiver mostrando uma execução registrada.

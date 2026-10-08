@@ -1,45 +1,55 @@
 # Runtime Inspector
 
-Interface React para explorar localmente as evidências geradas pelo executor
-`tg`: estado, tarefas, workflows, participantes, timeline e dados brutos.
+Interface React/Vite para consultar as evidências locais geradas pelo `tg`. O
+frontend acessa uma API FastAPI somente leitura; nenhum comando shell ou ação
+do Docker é disparado pela interface.
 
 ## Executar
 
-Na raiz do repositório:
+Requisitos: Node.js, npm e `uv`.
+
+Na raiz do repositório, inicie a API:
+
+```sh
+npm run api --prefix tools/inspector
+```
+
+Em outro terminal, inicie o frontend:
 
 ```sh
 npm install --prefix tools/inspector
 npm run dev --prefix tools/inspector
 ```
 
-Abra `http://127.0.0.1:4173`. Depois:
+Abra `http://127.0.0.1:4173`. A tela lista automaticamente as execuções em
+`.tg/runs`. O exemplo embutido continua disponível quando não houver uma
+execução local.
 
-1. execute `./tg scenario failure-reassignment` ou outro cenário;
-2. use `./tg status` para localizar `.tg/runs/ID/`;
-3. arraste os arquivos da execução para a tela ou use **Selecionar arquivos**;
-4. navegue por visão geral, etapas, timeline e dados brutos.
+Para ler outro diretório de execuções:
 
-O botão **Abrir exemplo** carrega uma execução registrada de recuperação sem
-exigir Docker.
+```sh
+TG_RUNS_DIR=/caminho/para/runs npm run api --prefix tools/inspector
+```
 
-## Entradas e privacidade
+## API
 
-São reconhecidos `result.json`, `summary.json`, `result.evaluation.json`,
-`events.jsonl`, `message-events.jsonl`, `status`, `environment` e `scenario`.
-O limite é de 20 MB por seleção.
+As rotas disponíveis são:
 
-Os arquivos são processados somente na memória do navegador. A aplicação não
-faz upload, persistência ou consulta ao Docker. O estado exibido é um snapshot
-e não acompanha serviços vivos.
+- `GET /api/health`
+- `GET /api/runs`
+- `GET /api/runs/{run_id}`
+- `GET /api/runs/{run_id}/events?after=0`
+- `GET /api/runs/{run_id}/stream`
+
+A API restringe a leitura aos arquivos de evidência reconhecidos dentro de
+`.tg/runs` e limita cada resposta de execução a 20 MB.
 
 ## Verificar
 
 ```sh
 npm test --prefix tools/inspector
 npm run build --prefix tools/inspector
+UV_CACHE_DIR=/tmp/tg-inspector-uv uv run --project tools/inspector/api --group dev pytest -q tools/inspector/api
 ```
-
-O parser permanece em `model.js` e possui testes sem dependência do DOM. A
-interface fica em `src/` e é empacotada com Vite.
 
 [Roteiro para apresentar o trabalho](../../docs/presentation.md)

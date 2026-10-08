@@ -25,7 +25,7 @@ do repositório, salvo indicação explícita.
 - [Contrato e configuração](reference.md): APIs, versões, políticas e variáveis.
 - [Avaliação e evidências](evaluation.md): perguntas, resultados e reprodução.
 - [Apresentação](presentation.md): roteiro de demonstração, leitura dos resultados e vínculo ao TCC.
-- [Visualizador local](../tools/inspector/README.md): tarefas, agentes e linha do tempo no navegador, sem servidor.
+- [Visualizador local](../tools/inspector/README.md): frontend React e API local somente leitura para tarefas, agentes e timeline.
 - [Escopo e limitações](limitations.md): fronteiras operacionais e experimentais.
 
 ## Como manter estes guias

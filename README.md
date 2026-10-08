@@ -53,11 +53,10 @@ verificação de prontidão, o resultado esperado e o encerramento do ambiente.
 Depois, o [workflow sequencial](scenarios/workflow-sequential/README.md)
 demonstra a coordenação de duas tarefas.
 
-Para ler os resultados visualmente, execute `npm install --prefix tools/inspector`
-e `npm run dev --prefix tools/inspector`, abra `http://127.0.0.1:4173` e selecione
-os arquivos da execução. O visualizador mostra tarefas, agentes e eventos em
-uma interface React. Inclui um exemplo registrado de recuperação
-que pode ser explorado sem Docker.
+Para ler os resultados visualmente, inicie a API e a interface conforme o
+[guia do visualizador](tools/inspector/README.md). A aplicação React lista as
+execuções de `.tg/runs` e mostra tarefas, agentes e eventos. Inclui também um
+exemplo registrado de recuperação que pode ser explorado sem Docker.
 
 ## O que está implementado
 

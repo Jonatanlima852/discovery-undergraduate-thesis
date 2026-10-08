@@ -58,12 +58,11 @@ Cada pasta contém logs de construção e execução, resultado estruturado,
 resumo do cenário e eventos. Veja a [referência do executor](cli.md) para o
 significado dos arquivos e os prazos configuráveis.
 
-Para uma leitura visual, inicie `npm run dev --prefix tools/inspector`, abra
-`http://127.0.0.1:4173` e selecione os arquivos da pasta indicada por
-`./tg status`. O
-[visualizador local](../tools/inspector/README.md) apresenta tarefas, saídas e
-eventos, com busca por agente ou identificador. Também inclui um exemplo
-registrado para exploração sem executar o Docker.
+Para uma leitura visual, inicie a API e o frontend conforme o
+[guia do visualizador local](../tools/inspector/README.md). A tela lista as
+execuções em `.tg/runs` e apresenta tarefas, saídas e eventos, com busca por
+agente ou identificador. Também inclui um exemplo registrado para exploração
+sem executar o Docker.
 
 ## 4. Explorar outros cenários
 

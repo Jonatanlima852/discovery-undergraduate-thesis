@@ -64,8 +64,8 @@ ignorado pelo Git e excluído do contexto de build. Esses relatórios
 operacionais não substituem a metodologia dos benchmarks.
 
 Esses arquivos podem ser abertos no [visualizador local](../tools/inspector/README.md).
-Inicie-o com `npm run dev --prefix tools/inspector`; a página lê os arquivos no navegador
-e não depende de os serviços ainda estarem ativos.
+A API local somente leitura fornece as evidências ao frontend e não depende de
+os serviços ainda estarem ativos.
 
 ## Prazos
 
