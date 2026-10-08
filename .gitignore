@@ -27,6 +27,7 @@ env/
 # Distribuição / empacotamento
 dist/
 build/
+node_modules/
 *.egg-info/
 *.egg
 

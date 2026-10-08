@@ -30,6 +30,7 @@ versão `1.0.0`; os stubs Go e Python estão incluídos no repositório.
 | Explorar cooperação, falhas e mensagens | [Catálogo de cenários](docs/scenarios.md) |
 | Desenvolver ou estender o projeto | [Guia de desenvolvimento](docs/development.md) |
 | Avaliar o trabalho de graduação | [Guia de avaliação e evidências](docs/evaluation.md) |
+| Apresentar o projeto ou explorar resultados | [Roteiro de apresentação](docs/presentation.md) e [visualizador local](tools/inspector/README.md) |
 
 ## Primeira experiência
 
@@ -51,6 +52,12 @@ O [guia de primeira execução](docs/quickstart.md) reúne os comandos, a
 verificação de prontidão, o resultado esperado e o encerramento do ambiente.
 Depois, o [workflow sequencial](scenarios/workflow-sequential/README.md)
 demonstra a coordenação de duas tarefas.
+
+Para ler os resultados visualmente, execute `npm install --prefix tools/inspector`
+e `npm run dev --prefix tools/inspector`, abra `http://127.0.0.1:4173` e selecione
+os arquivos da execução. O visualizador mostra tarefas, agentes e eventos em
+uma interface React. Inclui um exemplo registrado de recuperação
+que pode ser explorado sem Docker.
 
 ## O que está implementado
 

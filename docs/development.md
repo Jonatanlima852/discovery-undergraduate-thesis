@@ -30,6 +30,7 @@ versões próprias. Consulte [pyproject.toml](../sdk/python/pyproject.toml),
 | `experiments/` | Extração de métricas e resultados locais |
 | `infra/` | Compose básico |
 | `scripts/launcher/` | [Executor e testes](../scripts/launcher/README.md) da entrada `./tg` |
+| `tools/inspector/` | [Visualizador estático](../tools/inspector/README.md) dos resultados de cenários |
 | `docs/` | Documentação pública atual |
 | `internal-notes/` | Histórico interno de aprendizado; não é guia de uso |
 
@@ -132,5 +133,12 @@ execute as verificações do componente afetado. Preserve os resultados
 experimentais publicados: uma nova coleta deve ter identificação própria.
 O projeto ainda não tem pipeline de CI versionado nem um comando que execute
 todas as verificações acima.
+
+O visualizador usa React e Vite. Instale as dependências com
+`npm install --prefix tools/inspector` e use Node >=18. Execute
+`npm test --prefix tools/inspector` para o parser e
+`npm run build --prefix tools/inspector` para validar a interface. Durante o
+desenvolvimento, use `npm run dev --prefix tools/inspector` e verifique
+importação, navegação, busca e troca de fontes.
 
 [Referência](reference.md) · [Índice](README.md)

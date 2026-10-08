@@ -12,6 +12,7 @@ do repositório, salvo indicação explícita.
 | Entender a solução | [Arquitetura](architecture.md) → [contrato e configuração](reference.md) |
 | Alterar o código | [Desenvolvimento](development.md) → referência e testes do componente |
 | Avaliar o TCC | [Avaliação](evaluation.md) → artefatos → [limitações](limitations.md) |
+| Apresentar para outras pessoas | [Roteiro](presentation.md) → [visualizador local](../tools/inspector/README.md) |
 
 ## Guias e referência
 
@@ -23,6 +24,8 @@ do repositório, salvo indicação explícita.
 - [Desenvolvimento](development.md): mapa do código, ambiente, SDK e verificações.
 - [Contrato e configuração](reference.md): APIs, versões, políticas e variáveis.
 - [Avaliação e evidências](evaluation.md): perguntas, resultados e reprodução.
+- [Apresentação](presentation.md): roteiro de demonstração, leitura dos resultados e vínculo ao TCC.
+- [Visualizador local](../tools/inspector/README.md): tarefas, agentes e linha do tempo no navegador, sem servidor.
 - [Escopo e limitações](limitations.md): fronteiras operacionais e experimentais.
 
 ## Como manter estes guias

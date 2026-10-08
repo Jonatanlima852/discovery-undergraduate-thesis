@@ -63,6 +63,10 @@ Uma falha anterior ao cenário pode impedir a criação de `summary.json` e
 ignorado pelo Git e excluído do contexto de build. Esses relatórios
 operacionais não substituem a metodologia dos benchmarks.
 
+Esses arquivos podem ser abertos no [visualizador local](../tools/inspector/README.md).
+Inicie-o com `npm run dev --prefix tools/inspector`; a página lê os arquivos no navegador
+e não depende de os serviços ainda estarem ativos.
+
 ## Prazos
 
 ```sh
