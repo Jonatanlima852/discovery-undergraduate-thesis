@@ -2,14 +2,11 @@
 # Rode qualquer target com: make <target>
 # Exemplo: make proto
 
-# Adiciona GOPATH/bin ao PATH para que o protoc encontre os plugins Go
-export PATH := $(PATH):$(shell go env GOPATH)/bin
-
 # Diretorios
 PROTO_DIR      := proto
 GO_OUT_DIR     := runtime/gen/go
 PYTHON_OUT_DIR := sdk/python/src
-PROTO_INCLUDES := $(shell brew --prefix protobuf)/include
+PROTO_INCLUDES = $(shell brew --prefix protobuf)/include
 
 PROTO_FILES    := $(shell find $(PROTO_DIR) -name "*.proto")
 
@@ -20,8 +17,8 @@ check-env:
 	@echo "Verificando ferramentas..."
 	@which go > /dev/null 2>&1 || (echo "ERRO: go nao encontrado" && exit 1)
 	@which protoc > /dev/null 2>&1 || (echo "ERRO: protoc nao encontrado" && exit 1)
-	@which protoc-gen-go > /dev/null 2>&1 || (echo "ERRO: protoc-gen-go nao encontrado. Rode: go install google.golang.org/protobuf/cmd/protoc-gen-go@latest" && exit 1)
-	@which protoc-gen-go-grpc > /dev/null 2>&1 || (echo "ERRO: protoc-gen-go-grpc nao encontrado. Rode: go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest" && exit 1)
+	@PATH="$(PATH):$$(go env GOPATH)/bin" command -v protoc-gen-go > /dev/null 2>&1 || (echo "ERRO: protoc-gen-go nao encontrado. Rode: go install google.golang.org/protobuf/cmd/protoc-gen-go@latest" && exit 1)
+	@PATH="$(PATH):$$(go env GOPATH)/bin" command -v protoc-gen-go-grpc > /dev/null 2>&1 || (echo "ERRO: protoc-gen-go-grpc nao encontrado. Rode: go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest" && exit 1)
 	@which uv > /dev/null 2>&1 || (echo "ERRO: uv nao encontrado. Rode: brew install uv" && exit 1)
 	@which docker > /dev/null 2>&1 || (echo "ERRO: docker nao encontrado" && exit 1)
 	@echo "Tudo ok."
@@ -34,7 +31,7 @@ proto: check-env
 	@mkdir -p $(GO_OUT_DIR)
 	@mkdir -p $(PYTHON_OUT_DIR)
 	@echo "Gerando stubs Go..."
-	protoc \
+	PATH="$(PATH):$$(go env GOPATH)/bin" protoc \
 		--proto_path=$(PROTO_DIR) \
 		--proto_path=$(PROTO_INCLUDES) \
 		--go_out=$(GO_OUT_DIR) \
@@ -71,12 +68,15 @@ test:
 
 # up / down / logs — Docker Compose
 
-.PHONY: up demo
+.PHONY: up demo doctor
 up:
 	docker compose -f infra/docker-compose.yml up --build -d
 
-demo: up
-	docker compose -f infra/docker-compose.yml --profile client run --build --rm client-runner
+demo:
+	./tg demo
+
+doctor:
+	./tg doctor
 
 .PHONY: down
 down:
@@ -98,7 +98,9 @@ help:
 	@echo "  make build       Compila os servicos Go"
 	@echo "  make test        Roda os testes Go"
 	@echo "  make up          Sobe o sistema via Docker Compose"
-	@echo "  make demo        Sobe o sistema e executa uma task echo"
+	@echo "  make demo        Executa ./tg demo com limpeza automatica"
+	@echo "  make doctor      Verifica Docker e configuracao via ./tg doctor"
 	@echo "  make down        Para e remove os conteineres"
 	@echo "  make logs        Mostra logs de todos os servicos"
+	@echo "  ./tg help        Cenarios isolados, logs, status e encerramento"
 	@echo ""

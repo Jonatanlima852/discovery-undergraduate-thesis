@@ -4,7 +4,7 @@
 
 | Atividade | Ferramentas |
 |---|---|
-| Demonstração básica em contêineres | Docker e Compose v2 |
+| Demonstrações e cenários via `./tg` | Docker e Compose >=2.24.4 |
 | SDK, scripts e cenários Python | uv e Python compatível com o projeto |
 | Compilar e testar o runtime localmente | Go 1.26.3 ou compatível com `runtime/go.mod` |
 | Regenerar contrato | Go, protoc, plugins Go, uv e grpcio-tools |
@@ -29,6 +29,7 @@ versões próprias. Consulte [pyproject.toml](../sdk/python/pyproject.toml),
 | `benchmarks/` | Campanhas, resultados selecionados e gráficos |
 | `experiments/` | Extração de métricas e resultados locais |
 | `infra/` | Compose básico |
+| `scripts/launcher/` | [Executor e testes](../scripts/launcher/README.md) da entrada `./tg` |
 | `docs/` | Documentação pública atual |
 | `internal-notes/` | Histórico interno de aprendizado; não é guia de uso |
 
@@ -61,6 +62,7 @@ uv run --directory sdk/python --with pytest python -m pytest tests -q
 python3 -m unittest logistics.test_domain
 python3 -m unittest discover -s experiments/scripts -p 'test_*.py'
 sh scripts/check-contract-freeze.sh
+uv run --directory sdk/python python -m unittest discover -s ../../scripts/launcher -p 'test_*.py'
 ```
 
 Os testes do SDK usam clientes falsos para LLM e não exigem chave. Integrações
@@ -120,8 +122,8 @@ alteração, mas não prova compatibilidade semântica.
 
 `make proto` automatiza a geração; sua configuração atual de includes usa
 Homebrew. Em outro ambiente, ajuste o caminho de includes ao protoc instalado.
-O Makefile também consulta Go e Homebrew durante a leitura; para uso somente
-Docker, prefira os comandos diretos do [quickstart](quickstart.md).
+Go e Homebrew são consultados apenas nas tarefas que precisam deles;
+`make demo` e `make doctor` delegam ao [executor tg](cli.md).
 
 ## Critério para uma mudança revisável
 

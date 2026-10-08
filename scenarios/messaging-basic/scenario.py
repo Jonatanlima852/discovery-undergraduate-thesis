@@ -1,6 +1,8 @@
 """Valida publicação e recebimento de MessageEnvelope correlacionado."""
 
 import os
+import json
+from dataclasses import asdict
 import sys
 from pathlib import Path
 
@@ -33,6 +35,8 @@ def main():
     assert message.conversation_id == "conversation-basic"
     assert message.correlation_id == "correlation-basic"
     assert message.trace_id == "trace-basic"
+    if report_path := os.getenv("SCENARIO_REPORT_PATH"):
+        Path(report_path).write_text(json.dumps(asdict(message), indent=2) + "\n")
     print(
         "CENÁRIO APROVADO "
         f"message_id={message.message_id} trace_id={message.trace_id}"

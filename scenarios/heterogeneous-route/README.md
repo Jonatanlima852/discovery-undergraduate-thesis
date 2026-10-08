@@ -28,6 +28,19 @@ Dockerfile ou relatório do cenário.
 
 ## Execução
 
+Com Docker e Compose >=2.24.4 e a chave configurada acima:
+
+```sh
+./tg doctor heterogeneous-route
+./tg scenario heterogeneous-route
+```
+
+O executor roda também o cliente em contêiner, salva o relatório em
+`.tg/runs/ID/result.json` e encerra os serviços. Há chamadas reais à LLM.
+Veja [configuração e prazos](../../docs/cli.md).
+
+## Execução manual (Python e uv no host)
+
 ```sh
 docker compose \
   --env-file scenarios/heterogeneous-route/.env \

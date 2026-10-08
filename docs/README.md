@@ -16,6 +16,8 @@ do repositório, salvo indicação explícita.
 ## Guias e referência
 
 - [Primeira execução](quickstart.md): requisitos, comandos Docker, resultado e diagnóstico.
+- [Executor tg](cli.md): comandos, isolamento, prazos e arquivos de resultado.
+- [Execução manual](manual-execution.md): Compose básico e cliente no host.
 - [Arquitetura e conceitos](architecture.md): responsabilidades, fluxos e glossário.
 - [Catálogo de cenários](scenarios.md): objetivos, requisitos e resultados esperados.
 - [Desenvolvimento](development.md): mapa do código, ambiente, SDK e verificações.

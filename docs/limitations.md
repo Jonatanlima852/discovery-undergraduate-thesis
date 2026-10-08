@@ -27,13 +27,15 @@ agentes. O contrato e a implementação de referência são o centro da contribu
 
 ## Uso e avaliação atuais
 
-- O Compose básico exige conferir prontidão pelos logs. Os cenários dedicados
-  usam healthchecks, que não substituem a verificação de registro dos agentes.
+- No caminho manual, o Compose básico exige conferir prontidão pelos logs.
+  `./tg` verifica endpoints e registro dos agentes antes de executar o cenário.
 - O cliente genérico não apresenta workflows; use os scripts ou `Scenario`.
 - A suíte A–E inclui chamadas LLM e exige credencial mesmo contendo casos
   determinísticos. Os cenários individuais sem LLM continuam disponíveis.
 - Os runners de benchmarks reutilizam um volume de eventos. Uma nova coleta
   deve começar em ambiente isolado ou com limpeza deliberada após preservar dados.
+  Os cenários via `./tg` já usam volumes e diretórios exclusivos por execução;
+  isso não altera o comportamento dos runners de benchmark.
 - Dependências instaladas por alguns Dockerfiles não seguem os locks locais.
 - Os resultados logísticos publicados cobrem oito casos, duas repetições e um
   modelo. Não estabelecem generalização para outros domínios ou modelos.
@@ -43,7 +45,7 @@ agentes. O contrato e a implementação de referência são o centro da contribu
 
 ## Direções de evolução
 
-Padronizar execução e diagnóstico, isolar coletas, melhorar proveniência e
+Ampliar o isolamento às campanhas de benchmark, melhorar proveniência e
 relatórios, automatizar verificações e ampliar a avaliação são próximos
 incrementos possíveis. Persistência, segurança de transporte e outros modelos
 de agentes exigem decisões próprias de escopo.

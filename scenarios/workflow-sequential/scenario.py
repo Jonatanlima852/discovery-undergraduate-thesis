@@ -31,6 +31,8 @@ def main():
             raise AssertionError(f"unexpected step order: {list(result.steps)}")
         if result.output.get("echo") != "second":
             raise AssertionError(f"unexpected final output: {result.output}")
+        if report_path := os.getenv("SCENARIO_REPORT_PATH"):
+            result.save(report_path)
         print(
             f"CENÁRIO APROVADO workflow_id={result.workflow_id} "
             f"run_id={result.run_id} trace_id={result.trace_id}"

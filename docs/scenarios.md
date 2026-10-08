@@ -1,16 +1,27 @@
 # Catálogo de cenários
 
-Comece pelos casos determinísticos. Os READMEs vinculados contêm comandos,
-topologia e encerramento. Execute-os da raiz do repositório.
+Comece pelos casos determinísticos. Todos os cenários abaixo podem ser
+executados pelo [executor tg](cli.md), com Docker e Compose >=2.24.4, sem
+Python ou uv no host. Os READMEs também mantêm comandos manuais, que podem
+exigir ferramentas adicionais. Execute da raiz do repositório.
 
-| Cenário | O que observar | Requisitos adicionais ao Docker | Resultado esperado |
+| Cenário | O que observar | Requisitos adicionais via tg | Resultado esperado |
 |---|---|---|---|
 | [Echo básico](quickstart.md) | Descoberta e tarefa simples | Nenhum no caminho Docker | `COMPLETED`, agente `mock-agent-01` |
-| [Workflow sequencial](../scenarios/workflow-sequential/README.md) | Dependência `first → second` | Python e uv | `CENÁRIO APROVADO`, saída `echo: second` |
-| [Falha e reassignment](../scenarios/failure-reassignment/README.md) | Timeout de `a-slow` e nova atribuição | Python e uv | `CENÁRIO APROVADO agent_id=b-healthy` |
-| [Mensageria](../scenarios/messaging-basic/README.md) | Envelope e correlação preservados | Python e uv | `CENÁRIO APROVADO`, mesmo message ID |
-| [Rota heterogênea](../scenarios/heterogeneous-route/README.md) | Planner LLM, rota BDI e explicação LLM | Python, uv, chave e acesso ao modelo configurado | Rota `A → B → D`, distância 25 e relatório JSON |
-| [Missão logística](../scenarios/logistics-mission/README.md) | Interpretação LLM e plano BDI com restrições | Python, uv, chave e acesso ao modelo configurado | Plano aceito pelo avaliador do domínio |
+| [Workflow sequencial](../scenarios/workflow-sequential/README.md) | Dependência `first → second` | Nenhum | Validação aprovada, saída `echo: second` |
+| [Falha e reassignment](../scenarios/failure-reassignment/README.md) | Timeout de `a-slow` e nova atribuição | Nenhum | Validação aprovada, agente `b-healthy` |
+| [Mensageria](../scenarios/messaging-basic/README.md) | Envelope e correlação preservados | Nenhum | Validação aprovada, mesmo message ID |
+| [Rota heterogênea](../scenarios/heterogeneous-route/README.md) | Planner LLM, rota BDI e explicação LLM | Chave e acesso ao modelo configurado | Rota `A → B → D`, distância 25 e relatório JSON |
+| [Missão logística](../scenarios/logistics-mission/README.md) | Interpretação LLM e plano BDI com restrições | Chave e acesso ao modelo configurado | Plano aceito pelo avaliador do domínio |
+
+```sh
+./tg scenario workflow-sequential
+./tg scenario failure-reassignment
+./tg scenario messaging-basic
+```
+
+O resumo aparece no terminal; a saída detalhada fica em `scenario.log` e o
+resultado estruturado em `result.json`, dentro do diretório da execução.
 
 ## Como escolher
 
@@ -27,6 +38,9 @@ uv run --directory sdk/python python ../../agents/meeting-scheduler/demo.py
 ```
 
 ## Endereços e isolamento
+
+Os endereços abaixo valem para os comandos Compose manuais. `./tg` remove as
+portas publicadas e usa exclusivamente a rede interna de cada execução.
 
 | Topologia | Endereço de entrada padrão no host |
 |---|---|

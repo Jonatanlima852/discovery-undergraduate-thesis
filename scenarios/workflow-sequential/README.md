@@ -9,6 +9,19 @@ SubmitWorkflow
       -> WorkflowResult.output
 ```
 
+## Execução recomendada
+
+Com Docker e Compose >=2.24.4, na raiz:
+
+```sh
+./tg scenario workflow-sequential
+```
+
+O executor aguarda o agente, salva resultados e encerra o ambiente. Veja a
+[referência](../../docs/cli.md) para `--keep`, logs e stop.
+
+## Execução manual (Python e uv no host)
+
 ```sh
 docker compose -f scenarios/workflow-sequential/compose.yaml \
   up --build -d --wait

@@ -27,6 +27,11 @@ def main():
     evaluation = evaluate_plan(world, case["mission"], candidate)
     if not evaluation["valid"]:
         raise AssertionError(evaluation["failure_reason"])
+    if report_path := os.getenv("SCENARIO_REPORT_PATH"):
+        result.save(report_path)
+        Path(report_path).with_suffix(".evaluation.json").write_text(
+            json.dumps(evaluation, ensure_ascii=False, indent=2) + "\n"
+        )
 
     print("Solicitação:", case["request"])
     print("Interpretação LLM:")

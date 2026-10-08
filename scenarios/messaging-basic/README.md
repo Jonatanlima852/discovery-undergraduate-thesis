@@ -3,6 +3,19 @@
 Valida o caminho mínimo `agent-a -> MessagingService -> agent-b`, incluindo
 payload, conversation, correlation, trace, task e TTL.
 
+## Execução recomendada
+
+Com Docker e Compose >=2.24.4, na raiz:
+
+```sh
+./tg scenario messaging-basic
+```
+
+O executor salva a mensagem recebida e os eventos antes de encerrar sua
+topologia. Veja a [referência](../../docs/cli.md).
+
+## Execução manual (Python e uv no host)
+
 ```sh
 docker compose -f scenarios/messaging-basic/compose.yaml up --build -d --wait
 

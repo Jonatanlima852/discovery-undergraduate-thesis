@@ -77,6 +77,10 @@ Essas convenções devem acompanhar qualquer uso das métricas publicadas.
 
 ## Executar uma nova campanha
 
+Os cenários de demonstração podem ser executados via `./tg scenario NOME`,
+com dados isolados em `.tg/runs/`. Os comandos abaixo continuam usando os
+runners específicos de benchmark, com os requisitos e limitações próprios.
+
 Requisitos: Docker/Compose, Python, uv e acesso ao modelo configurado. Crie
 `.env` na raiz com `OPENAI_API_KEY` e, se necessário, `LLM_MODEL`. A chave deve
 permanecer local. Os scripts aceitam outro arquivo via `BENCHMARK_ENV_FILE`.

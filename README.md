@@ -33,10 +33,19 @@ versão `1.0.0`; os stubs Go e Python estão incluídos no repositório.
 
 ## Primeira experiência
 
-Com Docker e Docker Compose v2, a demonstração básica executa uma tarefa
+Com Docker e Docker Compose >=2.24.4, a demonstração básica executa uma tarefa
 `echo` pelo Registry, Orchestrator e agente mock, sem chave de LLM nem
 instalação local de Go ou Python. A primeira preparação baixa dependências e
 constrói imagens.
+
+```sh
+./tg doctor
+./tg demo
+```
+
+O executor aguarda os agentes, salva resultados em `.tg/runs/` e encerra sua
+topologia automaticamente. Use `./tg status` e `./tg logs` para inspecionar a
+última execução. Veja todos os comandos em [referência do executor](docs/cli.md).
 
 O [guia de primeira execução](docs/quickstart.md) reúne os comandos, a
 verificação de prontidão, o resultado esperado e o encerramento do ambiente.

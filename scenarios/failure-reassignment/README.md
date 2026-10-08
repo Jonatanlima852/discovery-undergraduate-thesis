@@ -12,6 +12,17 @@ O Registry ordena agentes por ID, portanto `a-slow` é selecionado primeiro.
 
 ## Executar
 
+Com Docker e Compose >=2.24.4, na raiz:
+
+```sh
+./tg scenario failure-reassignment
+```
+
+O executor aguarda os dois agentes, salva relatório e eventos e encerra sua
+topologia. Veja a [referência](../../docs/cli.md).
+
+## Execução manual (Python e uv no host)
+
 ```sh
 docker compose \
   -f scenarios/failure-reassignment/compose.yaml \

@@ -1,4 +1,8 @@
 .git
+.tg
+.env
+**/.env
+**/.env.*
 .venv
 **/.venv
 **/node_modules

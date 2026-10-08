@@ -1,101 +1,100 @@
 # Primeira execução
 
-Este tutorial envia uma tarefa `echo` a um agente descoberto pelo runtime.
-Ele verifica a integração básica; a cooperação BDI/LLM é um cenário posterior.
+`./tg` prepara uma topologia isolada, espera pelos serviços e agentes, executa
+a demonstração e salva os resultados antes de encerrar o ambiente.
 
 ## Requisitos
 
-- Repositório clonado e terminal na sua raiz.
-- Docker em execução, com Docker Compose v2.
-- Portas locais 50051, 50052, 50053 e 60051 disponíveis.
+- Repositório clonado e terminal na raiz.
+- Docker em execução, com Docker Compose **2.24.4 ou superior**.
+- Shell POSIX: macOS/Linux; no Windows, use um ambiente como WSL com Docker.
 - Rede para baixar imagens e dependências na primeira construção.
 
-O caminho abaixo executa também o cliente no Docker. Não exige Go, Python,
-`uv`, `protoc` ou credencial de LLM no host. Confira o Docker:
+O cliente também roda em contêiner. Não é necessário instalar Python, Go, uv
+ou protoc no host, nem configurar chave de LLM para esta demonstração.
+
+## 1. Conferir o ambiente
 
 ```sh
-docker info
-docker compose version
+./tg doctor
 ```
 
-## 1. Iniciar e conferir a prontidão
+O diagnóstico verifica Docker, versão do Compose e configuração da topologia,
+sem iniciar contêineres. O executor não publica portas no host: pode coexistir
+com outras topologias sem disputar as portas 50051/50052.
+
+## 2. Executar a demonstração
 
 ```sh
-docker compose -f infra/docker-compose.yml up --build -d
-docker compose -f infra/docker-compose.yml ps
-docker compose -f infra/docker-compose.yml logs --tail=50 registry orchestrator mock-agent
+./tg demo
 ```
 
-O Compose básico inicia Registry, Orchestrator, Messaging e mock-agent.
-Ele ainda não tem healthchecks: `Up` indica que o contêiner está iniciado,
-mas não garante que o agente já se registrou. Nos logs, aguarde as mensagens
-de início dos serviços e `registered with registry` do mock-agent. Repita a
-consulta de logs se necessário.
-
-## 2. Enviar a tarefa
-
-```sh
-docker compose -f infra/docker-compose.yml --profile client run --build --rm client-runner \
-  --goal "Teste ponta a ponta" --capability echo
-```
-
-Trecho esperado da resposta, com IDs e horário variáveis:
+A primeira construção pode demorar. O comando informa o caminho de `build.log`
+e avança por prontidão, execução e validação. O trecho final deve conter:
 
 ```text
-Resultado:
-  status   : COMPLETED
-  agent_id : mock-agent-01
-  output   : {"echo": "Teste ponta a ponta"}
+Cenário aprovado: demo
+Estado: COMPLETED
+Resultados: .../.tg/runs/tg-.../
 ```
 
-O cliente solicita a capacidade `echo`. O Orchestrator consulta o Registry,
-escolhe um agente compatível e chama seu endpoint de execução. O resultado
-retorna ao cliente com a identificação do agente.
+A tarefa solicita a capacidade `echo`, o Orchestrator descobre `mock-agent-01`
+e o agente conclui a tarefa. O mock atual devolve status e identificação; esta
+demonstração não exige um payload de resposta. O resultado completo e seu
+trace ficam em `result.json`.
 
-O serviço Messaging também está disponível, mas esta tarefa usa chamadas
-diretas ao agente e não publica um `MessageEnvelope`.
-
-## 3. Observar e encerrar
+## 3. Consultar o resultado
 
 ```sh
-docker compose -f infra/docker-compose.yml logs --tail=50 orchestrator mock-agent
-docker compose -f infra/docker-compose.yml exec -T orchestrator cat /data/events.jsonl
-docker compose -f infra/docker-compose.yml down
+./tg status
+./tg logs
 ```
 
-`down` remove os contêineres e a rede deste projeto, preservando o volume de
-eventos. Assim, o JSONL pode conter execuções anteriores; use o `trace_id` da
-resposta para identificar a tarefa atual. `down -v` também apaga o volume e
-seu histórico; use essa variante apenas para uma limpeza deliberada.
+Os comandos usam a última execução iniciada neste checkout. `status` mostra o
+ID, cenário, resultado e estado do ambiente. `logs` funciona também depois do
+encerramento, lendo os arquivos exportados.
 
-## Diagnóstico
+Cada pasta contém logs de construção e execução, resultado estruturado,
+resumo do cenário e eventos. Veja a [referência do executor](cli.md) para o
+significado dos arquivos e os prazos configuráveis.
 
-| Sintoma | O que conferir |
+## 4. Explorar outros cenários
+
+```sh
+./tg scenario workflow-sequential
+./tg scenario failure-reassignment
+./tg scenario messaging-basic
+```
+
+Os três cenários dispensam LLM. O primeiro encadeia duas tarefas; o segundo
+recupera a execução após um timeout; o terceiro verifica uma mensagem com
+seus identificadores de correlação.
+
+Para manter os serviços após um cenário:
+
+```sh
+./tg scenario workflow-sequential --keep
+./tg logs
+./tg stop
+```
+
+O encerramento atua somente na execução selecionada e preserva os arquivos
+locais de resultado. Sem `--keep`, a limpeza ocorre automaticamente, inclusive
+em falha ou interrupção tratada pelo executor.
+
+## Diagnóstico rápido
+
+| Situação | Próximo passo |
 |---|---|
-| Docker não responde | Inicie o Docker e repita `docker info` |
-| Porta já ocupada | Encerre a outra topologia que usa a porta; os cenários de workflow e falha têm portas próprias |
-| `UNAVAILABLE` | Confira `ps` e logs; aguarde os serviços e repita o envio |
-| `no compatible agent found` | Confira o registro do mock-agent e a capacidade `echo` |
-| Mock-agent encerrou ao iniciar | Com o Registry pronto, execute `docker compose -f infra/docker-compose.yml restart mock-agent` e confira o registro |
-| Não há eventos no host | O Compose grava em `/data/events.jsonl`, no volume do contêiner |
+| Docker não responde | Inicie o Docker e execute `./tg doctor` novamente |
+| Compose antigo | Atualize para >=2.24.4 |
+| Falha ao construir | Leia `build.log`; confira rede e disponibilidade das dependências |
+| Agente não ficou pronto | Confira `runner.log` e `services.log`; o erro identifica os agentes pendentes |
+| Cenário falhou | Confira `scenario.log`, `summary.json` e eventos; após corrigir a causa, inicie uma nova execução |
+| Limpeza falhou ou terminal encerrou abruptamente | Execute `./tg stop ID`, usando o ID mostrado no início |
 
-## Cliente local, opcional
-
-Com Python e `uv` disponíveis, mantendo o runtime iniciado:
-
-```sh
-uv run --directory clients/submit-task python main.py \
-  --goal "Teste ponta a ponta" --capability echo
-```
-
-O cliente genérico atual serve ao caminho de tarefa simples. Para workflows,
-use os scripts de cenário: eles interpretam `workflow_result`, que o cliente
-genérico ainda não exibe corretamente.
-
-## Próxima experiência
-
-Execute o [workflow sequencial](../scenarios/workflow-sequential/README.md)
-para observar duas tarefas coordenadas, ou escolha outro caso no
-[catálogo de cenários](scenarios.md).
+Para publicar portas e usar um cliente no host, consulte a
+[execução manual](manual-execution.md). Para escolher o próximo experimento,
+consulte o [catálogo](scenarios.md).
 
 [Índice](README.md)

@@ -27,7 +27,9 @@ def main():
                 f"expected reassignment to b-healthy, got {result.agent_id}"
             )
 
-        report_path = ROOT / "experiments/results/failure-reassignment-report.json"
+        report_path = Path(os.getenv(
+            "SCENARIO_REPORT_PATH", ROOT / "experiments/results/failure-reassignment-report.json"
+        ))
         scenario.report().assert_completed().save(report_path)
         print(
             f"CENÁRIO APROVADO agent_id={result.agent_id} "
